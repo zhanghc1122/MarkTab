@@ -1,0 +1,45 @@
+import { readTextFile, writeTextFile, exists } from "@tauri-apps/plugin-fs";
+import { open, save } from "@tauri-apps/plugin-dialog";
+
+export async function readFileContent(path: string): Promise<string> {
+  return await readTextFile(path);
+}
+
+export async function writeFileContent(
+  path: string,
+  content: string
+): Promise<void> {
+  await writeTextFile(path, content);
+}
+
+export async function fileExists(path: string): Promise<boolean> {
+  return await exists(path);
+}
+
+export async function openFileDialog(): Promise<string | null> {
+  const selected = await open({
+    multiple: false,
+    filters: [
+      {
+        name: "Markdown",
+        extensions: ["md", "markdown", "txt"],
+      },
+    ],
+  });
+  if (selected === null) return null;
+  return typeof selected === "string" ? selected : selected;
+}
+
+export async function saveFileDialog(
+  defaultPath?: string
+): Promise<string | null> {
+  return await save({
+    defaultPath,
+    filters: [
+      {
+        name: "Markdown",
+        extensions: ["md"],
+      },
+    ],
+  });
+}
