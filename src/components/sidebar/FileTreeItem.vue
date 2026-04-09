@@ -15,9 +15,7 @@ const tabStore = useTabStore();
 async function handleOpen() {
   try {
     const content = await readFileContent(props.file.filePath);
-    fileStore.addFile(props.file.filePath, props.file.groupId);
     tabStore.openTab(props.file, content);
-    fileStore.persistState();
   } catch (e) {
     console.error("Failed to open file:", e);
   }
