@@ -30,6 +30,18 @@ export const useAppConfigStore = defineStore("appConfig", () => {
     config.value.preferences.sidebarWidth = width;
   }
 
+  function setFontSize(size: number) {
+    config.value.preferences.fontSize = size;
+  }
+
+  function setLineWrapping(enabled: boolean) {
+    config.value.preferences.lineWrapping = enabled;
+  }
+
+  function setLineNumbers(shown: boolean) {
+    config.value.preferences.lineNumbers = shown;
+  }
+
   return {
     config,
     initialized,
@@ -38,5 +50,8 @@ export const useAppConfigStore = defineStore("appConfig", () => {
     setEditorMode,
     setAutoSaveDelay,
     setSidebarWidth,
+    setFontSize,
+    setLineWrapping,
+    setLineNumbers,
   };
 });

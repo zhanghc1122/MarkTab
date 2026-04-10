@@ -1,10 +1,15 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import SidebarToolbar from "../sidebar/SidebarToolbar.vue";
 import FileTree from "../sidebar/FileTree.vue";
+import { useAppConfigStore } from "../../stores/appConfigStore";
+
+const configStore = useAppConfigStore();
+const sidebarWidth = computed(() => configStore.config.preferences.sidebarWidth ?? 260);
 </script>
 
 <template>
-  <aside class="sidebar">
+  <aside class="sidebar" :style="{ width: sidebarWidth + 'px' }">
     <div class="sidebar-header">
       <span class="app-title">MarkTab</span>
     </div>
@@ -17,7 +22,6 @@ import FileTree from "../sidebar/FileTree.vue";
 
 <style scoped>
 .sidebar {
-  width: 260px;
   min-width: 200px;
   max-width: 400px;
   display: flex;

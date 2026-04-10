@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { computed, watch, ref } from "vue";
+import { computed } from "vue";
 import { useTabStore } from "../../stores/tabStore";
 import { useEditorStore } from "../../stores/editorStore";
+import { useAppConfigStore } from "../../stores/appConfigStore";
 import MarkdownEditor from "./MarkdownEditor.vue";
 import MarkdownPreview from "./MarkdownPreview.vue";
 
 const tabStore = useTabStore();
 const editorStore = useEditorStore();
+const configStore = useAppConfigStore();
+
+const prefs = computed(() => configStore.config.preferences);
 
 const activeTab = computed(() => tabStore.activeTab);
 
@@ -47,6 +51,9 @@ function handleToggleMode() {
       <MarkdownEditor
         v-if="!editorStore.isPreviewMode"
         :model-value="activeTab.content"
+        :font-size="prefs.fontSize ?? 14"
+        :line-wrapping="prefs.lineWrapping ?? true"
+        :line-numbers="prefs.lineNumbers ?? true"
         @update:model-value="handleContentChange"
       />
       <MarkdownPreview
