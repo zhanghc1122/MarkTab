@@ -49,10 +49,7 @@ function startResize(e: MouseEvent) {
 
 onMounted(async () => {
   await configStore.init();
-  fileStore.loadFromConfig(
-    configStore.config.recentFiles,
-    configStore.config.groups
-  );
+  fileStore.loadFromConfig(configStore.config.recentFiles);
   editorStore.setMode(configStore.config.preferences.editorMode);
 });
 </script>

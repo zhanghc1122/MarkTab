@@ -59,7 +59,24 @@ AppConfig (JSON in appDataDir)
 Active Tab Content → useAutoSave (debounced) → writeFileContent → disk
 ```
 
-All stores use Pinia Composition API style. `fileStore.persistState()` serializes runtime state back through `appConfigStore` to the JSON config file.
+All stores use Pinia Composition API style. `fileStore.persistState()` serializes runtime state back through `appConfigStore` to the JSON config file. Four stores total: `appConfigStore` (preferences & config persistence), `fileStore` (file list & groups), `tabStore` (open tabs, active tab, dirty state), `editorStore` (CodeMirror instance & editor-specific state).
+
+### Code Structure
+
+```
+src/
+  components/       editor/ (MarkdownEditor, TabBar, TabItem)
+                    layout/ (AppLayout, Sidebar)
+                    settings/ (SettingsDialog)
+                    sidebar/ (FileTree, FileTreeItem, SidebarToolbar)
+  composables/      useAutoSave, useExternalFileOpen, useFileDialog, useKeyboardShortcuts
+  services/         configService (config file read/write)
+                    fileIoService (file open/read/write via Tauri FS plugin)
+                    markdownService (markdown-it rendering + highlight.js)
+  stores/           appConfigStore, fileStore, tabStore, editorStore
+  types/            config.ts, file.ts, tab.ts
+  utils/            debounce.ts, pathUtils.ts
+```
 
 ### File Opening Paths
 
@@ -70,6 +87,8 @@ All stores use Pinia Composition API style. `fileStore.persistState()` serialize
 ### Rust Backend
 
 Minimal — `src-tauri/src/lib.rs` registers plugins, handles CLI argument forwarding, and has one custom command `open_default_apps_settings` (opens Windows Default Apps settings). All file I/O uses `tauri-plugin-fs` and `tauri-plugin-dialog` from the frontend.
+
+`lib.rs` has a `extract_file_path` helper that skips flags (`-` prefixed args) and the program name. On first launch, it sleeps 500ms before emitting `"open-file"` to let the frontend mount. `main.rs` uses `windows_subsystem = "windows"` to suppress the console window in release builds.
 
 ### Key Dependencies
 
@@ -82,6 +101,15 @@ Minimal — `src-tauri/src/lib.rs` registers plugins, handles CLI argument forwa
 
 - UI language is Chinese (zh-CN locale, Chinese text in settings and descriptions)
 - Vue components use `<script setup lang="ts">` (Composition API)
+- TypeScript strict mode: `strict: true`, `noUnusedLocals: true`, `noUnusedParameters: true` in tsconfig
 - File paths use `@tauri-apps/plugin-fs` APIs (not Node.js `fs`)
-- Tab dirty state: tracked by comparing `content` vs `originalContent` in `TabState`
+- Tab dirty state: tracked by comparing `content` vs `originalContent` in `TabState` (managed by `tabStore`)
 - CodeMirror extensions that may change at runtime (theme, lineWrapping, lineNumbers) use the `Compartment` pattern in `MarkdownEditor.vue` — dispatch `compartment.reconfigure()` via watchers instead of rebuilding `EditorState`
+- No test framework is set up — no vitest/jest/cypress/playwright config or test files exist
+
+## Tauri Config Notes
+
+- Window defaults: 1100x750, minimum 700x500
+- `security.csp: null` — CSP disabled intentionally (needed for markdown preview with highlight.js)
+- Vite uses `strictPort: true` on port 1420 (hardcoded Tauri expectation)
+- App identifier: `com.marktab.app`

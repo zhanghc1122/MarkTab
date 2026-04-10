@@ -1,9 +1,8 @@
-import type { FileEntry, FileGroup } from "./file";
+import type { FileEntry } from "./file";
 
 export interface AppConfig {
   version: number;
   recentFiles: FileEntry[];
-  groups: FileGroup[];
   preferences: {
     autoSaveDelay: number;
     sidebarWidth: number;
@@ -17,7 +16,6 @@ export interface AppConfig {
 export const DEFAULT_CONFIG: AppConfig = {
   version: 1,
   recentFiles: [],
-  groups: [],
   preferences: {
     autoSaveDelay: 2000,
     sidebarWidth: 260,
