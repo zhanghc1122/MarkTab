@@ -59,6 +59,7 @@ function handleToggleMode() {
       <MarkdownPreview
         v-else
         :source="activeTab.content"
+        :file-path="activeTab.filePath"
       />
     </div>
   </div>

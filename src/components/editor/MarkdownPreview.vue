@@ -4,9 +4,10 @@ import { renderMarkdown } from "../../services/markdownService";
 
 const props = defineProps<{
   source: string;
+  filePath?: string;
 }>();
 
-const renderedHtml = computed(() => renderMarkdown(props.source));
+const renderedHtml = computed(() => renderMarkdown(props.source, props.filePath));
 </script>
 
 <template>
