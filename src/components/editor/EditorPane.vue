@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import { useTabStore } from "../../stores/tabStore";
 import { useEditorStore } from "../../stores/editorStore";
 import { useAppConfigStore } from "../../stores/appConfigStore";
+import { readFileContent } from "../../services/fileIoService";
 import MarkdownEditor from "./MarkdownEditor.vue";
 import MarkdownPreview from "./MarkdownPreview.vue";
+import FileChangeBanner from "./FileChangeBanner.vue";
 
 const tabStore = useTabStore();
 const editorStore = useEditorStore();
@@ -13,6 +15,13 @@ const configStore = useAppConfigStore();
 const prefs = computed(() => configStore.config.preferences);
 
 const activeTab = computed(() => tabStore.activeTab);
+
+const hasExternalChange = computed(
+  () =>
+    activeTab.value?.externallyChanged || activeTab.value?.externallyDeleted
+);
+
+const isReloading = ref(false);
 
 function handleContentChange(content: string) {
   if (tabStore.activeTabId) {
@@ -23,6 +32,34 @@ function handleContentChange(content: string) {
 function handleToggleMode() {
   editorStore.toggleMode();
 }
+
+async function handleReload() {
+  const tab = activeTab.value;
+  if (!tab || isReloading.value) return;
+  isReloading.value = true;
+  try {
+    const content = await readFileContent(tab.filePath);
+    tabStore.reloadTabFromDisk(tab.id, content);
+  } catch (err) {
+    console.error("Failed to reload file:", err);
+  } finally {
+    setTimeout(() => {
+      isReloading.value = false;
+    }, 300);
+  }
+}
+
+function handleKeepLocal() {
+  const tab = activeTab.value;
+  if (!tab) return;
+  tabStore.clearExternalChangeState(tab.id);
+}
+
+function handleCloseTab() {
+  const tab = activeTab.value;
+  if (!tab) return;
+  tabStore.closeTab(tab.id);
+}
 </script>
 
 <template>
@@ -31,6 +68,24 @@ function handleToggleMode() {
       <span class="file-path" :title="activeTab.filePath">{{ activeTab.fileName }}</span>
       <div class="toolbar-right">
         <span v-if="activeTab.isDirty" class="dirty-indicator">Modified</span>
+        <button
+          class="reload-btn"
+          @click="handleReload"
+          :disabled="isReloading"
+          title="重新加载文件 (Ctrl+Shift+R)"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            :class="{ spin: isReloading }"
+          >
+            <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+          </svg>
+          Reload
+        </button>
         <button
           class="mode-toggle"
           @click="handleToggleMode"
@@ -47,6 +102,13 @@ function handleToggleMode() {
         </button>
       </div>
     </div>
+    <FileChangeBanner
+      v-if="hasExternalChange"
+      :tab="activeTab"
+      @reload="handleReload"
+      @keep-local="handleKeepLocal"
+      @close-tab="handleCloseTab"
+    />
     <div class="editor-content">
       <MarkdownEditor
         v-if="!editorStore.isPreviewMode"
@@ -101,6 +163,38 @@ function handleToggleMode() {
 .dirty-indicator {
   font-size: 11px;
   color: #d97706;
+}
+
+.reload-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border: 1px solid #f59e0b;
+  border-radius: 4px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.reload-btn:hover {
+  background: #fde68a;
+}
+
+.reload-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 0.3s ease-in-out;
 }
 
 .mode-toggle {

@@ -93,6 +93,39 @@ export const useTabStore = defineStore("tab", () => {
     activeTabId.value = id;
   }
 
+  function markTabExternallyChanged(id: string) {
+    const tab = tabs.value.find((t) => t.id === id);
+    if (tab) {
+      tab.externallyChanged = true;
+    }
+  }
+
+  function markTabExternallyDeleted(id: string) {
+    const tab = tabs.value.find((t) => t.id === id);
+    if (tab) {
+      tab.externallyDeleted = true;
+    }
+  }
+
+  function clearExternalChangeState(id: string) {
+    const tab = tabs.value.find((t) => t.id === id);
+    if (tab) {
+      tab.externallyChanged = false;
+      tab.externallyDeleted = false;
+    }
+  }
+
+  function reloadTabFromDisk(id: string, content: string) {
+    const tab = tabs.value.find((t) => t.id === id);
+    if (tab) {
+      tab.content = content;
+      tab.originalContent = content;
+      tab.isDirty = false;
+      tab.externallyChanged = false;
+      tab.externallyDeleted = false;
+    }
+  }
+
   return {
     tabs,
     activeTabId,
@@ -105,5 +138,9 @@ export const useTabStore = defineStore("tab", () => {
     saveTabScrollState,
     closeAllTabs,
     closeOtherTabs,
+    markTabExternallyChanged,
+    markTabExternallyDeleted,
+    clearExternalChangeState,
+    reloadTabFromDisk,
   };
 });

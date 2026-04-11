@@ -1,6 +1,8 @@
 import { readTextFile, writeTextFile, exists } from "@tauri-apps/plugin-fs";
 import { open, save } from "@tauri-apps/plugin-dialog";
 
+export const selfWriteTimestamps = new Map<string, number>();
+
 export async function readFileContent(path: string): Promise<string> {
   return await readTextFile(path);
 }
@@ -10,6 +12,7 @@ export async function writeFileContent(
   content: string
 ): Promise<void> {
   await writeTextFile(path, content);
+  selfWriteTimestamps.set(path, Date.now());
 }
 
 export async function fileExists(path: string): Promise<boolean> {

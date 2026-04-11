@@ -21,6 +21,8 @@
       "identifier": "fs:allow-exists",
       "allow": [{ "path": "$APPDATA/**" }, { "path": "**" }]
     },
-    "window-state:default"
+    "window-state:default",
+    "fs:allow-watch",
+    "fs:allow-unwatch"
   ]
 }

@@ -9,6 +9,7 @@ import { useEditorStore } from "../../stores/editorStore";
 import { useAutoSave } from "../../composables/useAutoSave";
 import { useKeyboardShortcuts } from "../../composables/useKeyboardShortcuts";
 import { useExternalFileOpen } from "../../composables/useExternalFileOpen";
+import { useFileWatcher } from "../../composables/useFileWatcher";
 
 const configStore = useAppConfigStore();
 const fileStore = useFileStore();
@@ -20,6 +21,7 @@ const activeTab = computed(() => tabStore.activeTab);
 useAutoSave(activeTab);
 useKeyboardShortcuts();
 useExternalFileOpen();
+useFileWatcher();
 
 const isResizing = ref(false);
 

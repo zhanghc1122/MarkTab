@@ -20,6 +20,7 @@ export function useAutoSave(activeTab: Ref<TabState | null>) {
 
       timer = setTimeout(async () => {
         if (!activeTab.value?.isDirty) return;
+        if (activeTab.value?.externallyChanged || activeTab.value?.externallyDeleted) return;
         try {
           await writeFileContent(activeTab.value.filePath, activeTab.value.content);
           const tabStore = useTabStore();

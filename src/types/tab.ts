@@ -7,4 +7,6 @@ export interface TabState {
   scrollTop: number;
   cursorPos: number;
   isDirty: boolean;
+  externallyChanged?: boolean;
+  externallyDeleted?: boolean;
 }

@@ -52,6 +52,21 @@ export function useKeyboardShortcuts() {
       return;
     }
 
+    // Ctrl+Shift+R: Reload active file from disk
+    if (ctrl && e.shiftKey && e.key === "R") {
+      e.preventDefault();
+      const tab = tabStore.activeTab;
+      if (tab && (tab.externallyChanged || tab.externallyDeleted)) {
+        try {
+          const content = await readFileContent(tab.filePath);
+          tabStore.reloadTabFromDisk(tab.id, content);
+        } catch (err) {
+          console.error("Failed to reload file:", err);
+        }
+      }
+      return;
+    }
+
     // Ctrl+P: Toggle preview/edit mode
     if (ctrl && e.key === "p") {
       e.preventDefault();
