@@ -20,6 +20,20 @@ const md = new MarkdownIt({
   },
 });
 
+// Heading counter for TOC id generation
+let headingCounter = 0;
+
+// Custom heading renderer to add id attributes for TOC navigation
+const defaultHeadingOpen = md.renderer.rules.heading_open;
+md.renderer.rules.heading_open = (tokens, idx, options, env, self) => {
+  const token = tokens[idx];
+  token.attrSet("id", `toc-heading-${headingCounter}`);
+  headingCounter++;
+  return defaultHeadingOpen
+    ? defaultHeadingOpen(tokens, idx, options, env, self)
+    : self.renderToken(tokens, idx, options);
+};
+
 // Store default image renderer for fallback
 const defaultImageRenderer = md.renderer.rules.image;
 
@@ -95,6 +109,7 @@ md.renderer.rules.image = (tokens, idx, options, env, self) => {
 };
 
 export function renderMarkdown(source: string, filePath?: string): string {
+  headingCounter = 0;
   return md.render(source, { filePath });
 }
 

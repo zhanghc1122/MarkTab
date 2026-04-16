@@ -74,6 +74,13 @@ export function useKeyboardShortcuts() {
       return;
     }
 
+    // Ctrl+Shift+O: Toggle TOC panel
+    if (ctrl && e.shiftKey && e.key === "O") {
+      e.preventDefault();
+      editorStore.toggleToc();
+      return;
+    }
+
     // Ctrl+Tab: Next tab
     if (ctrl && e.key === "Tab" && !e.shiftKey) {
       e.preventDefault();

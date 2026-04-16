@@ -3,6 +3,7 @@ import { ref } from "vue";
 
 export const useEditorStore = defineStore("editor", () => {
   const isPreviewMode = ref(false);
+  const tocOpen = ref(false);
 
   function toggleMode() {
     isPreviewMode.value = !isPreviewMode.value;
@@ -12,5 +13,9 @@ export const useEditorStore = defineStore("editor", () => {
     isPreviewMode.value = mode === "preview";
   }
 
-  return { isPreviewMode, toggleMode, setMode };
+  function toggleToc() {
+    tocOpen.value = !tocOpen.value;
+  }
+
+  return { isPreviewMode, tocOpen, toggleMode, setMode, toggleToc };
 });

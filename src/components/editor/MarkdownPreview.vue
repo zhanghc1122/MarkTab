@@ -33,6 +33,10 @@ function handleClick(e: MouseEvent) {
   e.preventDefault();
   open(href);
 }
+
+defineExpose({
+  getScrollContainer: () => previewRef.value?.parentElement ?? undefined,
+});
 </script>
 
 <template>

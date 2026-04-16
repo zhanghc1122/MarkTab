@@ -4,9 +4,12 @@ import { useTabStore } from "../../stores/tabStore";
 import { useEditorStore } from "../../stores/editorStore";
 import { useAppConfigStore } from "../../stores/appConfigStore";
 import { readFileContent } from "../../services/fileIoService";
+import { useTableOfContents } from "../../composables/useTableOfContents";
 import MarkdownEditor from "./MarkdownEditor.vue";
 import MarkdownPreview from "./MarkdownPreview.vue";
+import TableOfContents from "./TableOfContents.vue";
 import FileChangeBanner from "./FileChangeBanner.vue";
+import type { EditorView } from "@codemirror/view";
 
 const tabStore = useTabStore();
 const editorStore = useEditorStore();
@@ -22,6 +25,20 @@ const hasExternalChange = computed(
 );
 
 const isReloading = ref(false);
+
+const editorComponentRef = ref<InstanceType<typeof MarkdownEditor> | null>(null);
+const previewComponentRef = ref<InstanceType<typeof MarkdownPreview> | null>(null);
+
+const activeContent = computed(() => activeTab.value?.content ?? "");
+const { headings } = useTableOfContents(activeContent);
+
+const editorView = computed<EditorView | null>(() => {
+  return editorComponentRef.value?.getView?.() ?? null;
+});
+
+const previewScrollContainer = computed<HTMLElement | undefined>(() => {
+  return previewComponentRef.value?.getScrollContainer?.();
+});
 
 function handleContentChange(content: string) {
   if (tabStore.activeTabId) {
@@ -112,6 +129,7 @@ function handleCloseTab() {
     <div class="editor-content">
       <MarkdownEditor
         v-if="!editorStore.isPreviewMode"
+        ref="editorComponentRef"
         :model-value="activeTab.content"
         :font-size="prefs.fontSize ?? 14"
         :line-wrapping="prefs.lineWrapping ?? true"
@@ -120,8 +138,15 @@ function handleCloseTab() {
       />
       <MarkdownPreview
         v-else
+        ref="previewComponentRef"
         :source="activeTab.content"
         :file-path="activeTab.filePath"
+      />
+      <TableOfContents
+        :headings="headings"
+        :is-preview-mode="editorStore.isPreviewMode"
+        :preview-scroll-container="previewScrollContainer"
+        :editor-view="editorView"
       />
     </div>
   </div>
@@ -219,5 +244,6 @@ function handleCloseTab() {
 .editor-content {
   flex: 1;
   overflow: hidden;
+  position: relative;
 }
 </style>

@@ -126,6 +126,10 @@ watch(() => props.lineNumbers, (on) => {
     effects: lineNumbersCompartment.reconfigure(on ? lineNumbers() : []),
   });
 });
+
+defineExpose({
+  getView: () => view,
+});
 </script>
 
 <template>
