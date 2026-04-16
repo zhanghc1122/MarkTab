@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from "vue";
-import { renderMarkdown, renderMermaidBlocks } from "../../services/markdownService";
+import { renderMarkdown, renderMermaidBlocks, renderDrawioBlocks } from "../../services/markdownService";
 import { open } from "@tauri-apps/plugin-shell";
 
 const props = defineProps<{
@@ -15,9 +15,10 @@ watch(
   () => props.source,
   () => {
     renderedHtml.value = renderMarkdown(props.source, props.filePath);
-    nextTick(() => {
+    nextTick(async () => {
       if (previewRef.value) {
-        renderMermaidBlocks(previewRef.value);
+        await renderMermaidBlocks(previewRef.value);
+        await renderDrawioBlocks(previewRef.value);
       }
     });
   },

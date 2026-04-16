@@ -111,6 +111,31 @@ html, body, #app {
 
 .markdown-preview img { max-width: 100%; }
 
+/* draw.io diagram styles */
+.markdown-preview .drawio-diagram {
+  margin: 1em 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  max-width: 100%;
+}
+
+.markdown-preview .drawio-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.markdown-preview .drawio-placeholder {
+  margin: 1em 0;
+  padding: 16px;
+  background: #f6f8fa;
+  border: 1px dashed #d0d7de;
+  border-radius: 6px;
+  color: #656d76;
+  text-align: center;
+}
+
 .markdown-preview hr {
   border: none;
   border-top: 1px solid #ddd;
@@ -132,4 +157,6 @@ html, body, #app {
   .markdown-preview th { background: #2d333b; }
   .markdown-preview th, .markdown-preview td { border-color: #444; }
   .markdown-preview hr { border-top-color: #444; }
+  .markdown-preview .drawio-diagram { border-color: #444; background: #1c2128; }
+  .markdown-preview .drawio-placeholder { background: #2d333b; border-color: #444; color: #959da5; }
 }

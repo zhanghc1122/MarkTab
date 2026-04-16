@@ -1,6 +1,7 @@
 import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { readTextFile } from "@tauri-apps/plugin-fs";
 
 const md = new MarkdownIt({
   html: true,
@@ -43,10 +44,11 @@ function normalizePath(path: string): string {
   return resolved.join("\\");
 }
 
-function resolveImagePath(src: string, filePath: string): string {
-  if (!isLocalPath(src)) return src;
+const DRAWIO_EXTENSIONS = /\.drawio$/i;
 
-  // markdown-it may URL-encode non-ASCII chars in image src; decode first
+function resolveAbsolutePath(src: string, filePath: string): string | null {
+  if (!isLocalPath(src)) return null;
+
   let decodedSrc: string;
   try {
     decodedSrc = decodeURIComponent(src);
@@ -64,17 +66,27 @@ function resolveImagePath(src: string, filePath: string): string {
     absolutePath = dir + sep + decodedSrc;
   }
 
-  const normalized = normalizePath(absolutePath);
-  return convertFileSrc(normalized);
+  return normalizePath(absolutePath);
 }
 
 md.renderer.rules.image = (tokens, idx, options, env, self) => {
   const token = tokens[idx];
   const srcAttr = token.attrGet("src");
+  const envObj = env as { filePath?: string };
 
-  if (srcAttr && (env as { filePath?: string }).filePath) {
-    const resolved = resolveImagePath(srcAttr, (env as { filePath: string }).filePath);
-    token.attrSet("src", resolved);
+  if (srcAttr && envObj.filePath) {
+    const absolutePath = resolveAbsolutePath(srcAttr, envObj.filePath);
+
+    if (absolutePath && DRAWIO_EXTENSIONS.test(absolutePath)) {
+      const alt = md.utils.escapeHtml(token.content || "");
+      const escapedPath = md.utils.escapeHtml(absolutePath);
+      return `<div class="drawio-placeholder" data-drawio-path="${escapedPath}" data-alt="${alt}">` +
+             `<p>Loading diagram: ${alt || escapedPath}</p></div>`;
+    }
+
+    if (absolutePath) {
+      token.attrSet("src", convertFileSrc(absolutePath));
+    }
   }
 
   return defaultImageRenderer
@@ -119,6 +131,69 @@ export async function renderMermaidBlocks(container: HTMLElement): Promise<void>
       pre.replaceWith(wrapper);
     } else {
       block.replaceWith(wrapper);
+    }
+  }
+}
+
+let drawioViewerLoaded: Promise<void> | null = null;
+
+function loadDrawioViewer(): Promise<void> {
+  if (drawioViewerLoaded) return drawioViewerLoaded;
+
+  drawioViewerLoaded = new Promise<void>((resolve, reject) => {
+    if (typeof (window as any).GraphViewer !== "undefined") {
+      resolve();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "/js/viewer.min.js";
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load draw.io viewer"));
+    document.head.appendChild(script);
+  });
+
+  return drawioViewerLoaded;
+}
+
+export async function renderDrawioBlocks(container: HTMLElement): Promise<void> {
+  const placeholders = container.querySelectorAll<HTMLDivElement>(".drawio-placeholder");
+  if (placeholders.length === 0) return;
+
+  try {
+    await loadDrawioViewer();
+  } catch {
+    for (const el of placeholders) {
+      el.innerHTML = `<p style="color:red;">Failed to load draw.io viewer</p>`;
+    }
+    return;
+  }
+
+  const GraphViewer = (window as any).GraphViewer;
+
+  for (const placeholder of placeholders) {
+    const filePath = placeholder.getAttribute("data-drawio-path");
+    if (!filePath) continue;
+
+    try {
+      const xmlContent = await readTextFile(filePath);
+
+      const viewerDiv = document.createElement("div");
+      viewerDiv.className = "mxgraph drawio-diagram";
+      viewerDiv.setAttribute("data-mxgraph", JSON.stringify({
+        xml: xmlContent,
+        toolbar: "zoom layers",
+        resize: true,
+      }));
+
+      placeholder.replaceWith(viewerDiv);
+
+      if (GraphViewer && typeof GraphViewer.processElements === "function") {
+        GraphViewer.processElements();
+      }
+    } catch {
+      placeholder.innerHTML = `<p style="color:red; border: 1px solid #e0e0e0; padding: 12px; border-radius: 4px; background: #fff5f5;">` +
+        `<strong>Diagram not found:</strong> ${md.utils.escapeHtml(filePath)}</p>`;
     }
   }
 }
