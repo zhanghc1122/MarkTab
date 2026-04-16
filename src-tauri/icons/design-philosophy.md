@@ -1,11 +1,28 @@
-# Tabular Light
+# MarkTab A4 Crystalline Edition
 
 ## Design Philosophy
 
-The essence is the intersection where structure meets expression — the moment a blank page transforms into organized thought. It draws from the geometry of tabbed interfaces, where overlapping planes create depth through simple layering, and from the Markdown philosophy where minimal syntax unlocks rich meaning. Every element must appear as though it was shaped by a master craftsperson who understands that the most powerful design statements come from restraint, not excess.
+Inspired by the Obsidian aesthetic, the "Crystalline Edition" blends the structural discipline of the A4 paper ratio with the multifaceted depth of a crystal. This design represents the "polishing" of raw thoughts into structured, crystalline knowledge through Markdown.
 
-The palette lives in the electric space between violet and cerulean — a gradient that suggests both the creative spark of purple and the clarity of blue, merging where ideas crystallize into form. White surfaces float upon this chromatic field like pages waiting to be written, their edges crisp with the precision of surgical instruments. Shadows are not decorative but structural — they describe the physical truth of layered planes existing in real space, each cast with the painstaking accuracy of an architect's rendering.
+### Composition
 
-The hashtag symbol — six lines intersecting to create order from void — serves as the sacred geometry of this movement: a mark that transforms plain text into structured meaning with a single gesture. Its presence should be felt more than seen, a watermark of intention embedded in the visual DNA. At the scale of a fingertip, it must be instantly recognizable; at the scale of a billboard, it must reward sustained contemplation.
+- **Ratio:** 1:√2 (A4 Portrait).
+- **Aesthetic:** Faceted geometry with internal structural depth.
+- **Palette:** A multi-layered violet spectrum precisely tuned to the Obsidian aesthetic. It uses sharp transitions between light and dark facets to create a crystalline look that is highly visible on any background.
+- **Hashtag Symbol:** Solid white with a 30% opacity drop shadow, ensuring it remains the focal point against the deep purple facets.
 
-This dual nature — legible at speed, rich at rest — separates the work of a true master from the merely competent. Every curve radius, every gradient stop, every pixel of negative space must be the product of deep expertise and countless hours of refinement. The composition breathes: tabs suggest multiplicity without clutter, lines of text imply content without noise, and the central symbol anchors meaning without domination. This is meticulous craft elevated to visual philosophy.
+### Color Palette (Obsidian-Inspired)
+
+| Facet | Color Range |
+|---------|-------|
+| **Top** | `#C4B5FD` (Lavender) → `#A78BFA` |
+| **Right** | `#8B5CF6` (Violet) → `#6D28D9` |
+| **Left** | `#A78BFA` → `#8B5CF6` |
+| **Bottom** | `#4C1D95` (Purple) → `#1E1B4B` (Midnight) |
+| **Hashtag** | `#FFFFFF` (Solid White) |
+
+### Design Principles
+
+- **Knowledge as a Crystal:** Markdown is the tool that facets and structures information.
+- **Modern Verticality:** The A4 ratio is preserved but reimagined as a physical, crystalline slab.
+- **Professional Depth:** Uses light and shadow within a single color family to create interest and visibility.

@@ -1,18 +1,42 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { renderMarkdown } from "../../services/markdownService";
+import { ref, watch, nextTick } from "vue";
+import { renderMarkdown, renderMermaidBlocks } from "../../services/markdownService";
+import { open } from "@tauri-apps/plugin-shell";
 
 const props = defineProps<{
   source: string;
   filePath?: string;
 }>();
 
-const renderedHtml = computed(() => renderMarkdown(props.source, props.filePath));
+const previewRef = ref<HTMLElement>();
+const renderedHtml = ref("");
+
+watch(
+  () => props.source,
+  () => {
+    renderedHtml.value = renderMarkdown(props.source, props.filePath);
+    nextTick(() => {
+      if (previewRef.value) {
+        renderMermaidBlocks(previewRef.value);
+      }
+    });
+  },
+  { immediate: true },
+);
+
+function handleClick(e: MouseEvent) {
+  const target = (e.target as Element).closest("a");
+  if (!target) return;
+  const href = target.getAttribute("href");
+  if (!href || !href.match(/^https?:\/\//i)) return;
+  e.preventDefault();
+  open(href);
+}
 </script>
 
 <template>
   <div class="markdown-preview-wrapper">
-    <div class="markdown-preview" v-html="renderedHtml"></div>
+    <div class="markdown-preview" ref="previewRef" v-html="renderedHtml" @click="handleClick"></div>
   </div>
 </template>
 

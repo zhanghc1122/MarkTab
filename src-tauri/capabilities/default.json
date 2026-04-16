@@ -23,6 +23,7 @@
     },
     "window-state:default",
     "fs:allow-watch",
-    "fs:allow-unwatch"
+    "fs:allow-unwatch",
+    "shell:allow-open"
   ]
 }
