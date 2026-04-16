@@ -69,7 +69,6 @@ function handleWheel(e: WheelEvent) {
 }
 
 function handleDragStart(e: MouseEvent) {
-  if (modalScale.value <= 1) return;
   isDragging.value = true;
   dragStart.value = { x: e.clientX - modalTranslateX.value, y: e.clientY - modalTranslateY.value };
 }
@@ -113,7 +112,7 @@ defineExpose({
            @mousedown="handleDragStart" @mousemove="handleDragMove" @mouseup="handleDragEnd" @mouseleave="handleDragEnd">
         <button class="diagram-modal-close" @click="closeDiagramModal">&times;</button>
         <div class="diagram-modal-body" v-html="modalSvgContent"
-             :style="{ transform: `translate(${modalTranslateX}px, ${modalTranslateY}px) scale(${modalScale})`, cursor: isDragging ? 'grabbing' : modalScale > 1 ? 'grab' : 'default' }"></div>
+             :style="{ transform: `translate(${modalTranslateX}px, ${modalTranslateY}px) scale(${modalScale})`, cursor: isDragging ? 'grabbing' : 'grab' }"></div>
       </div>
     </div>
   </Teleport>
