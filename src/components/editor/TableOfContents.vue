@@ -184,7 +184,7 @@ function togglePanel() {
     <button
       class="toc-toggle"
       @click="togglePanel"
-      title="目录 (Ctrl+Shift+O)"
+      title="Outline (Ctrl+Shift+O)"
       :class="{ active: isOpen }"
     >
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -193,8 +193,8 @@ function togglePanel() {
     </button>
     <Transition name="toc-slide">
       <div v-if="isOpen" class="toc-panel">
-        <div class="toc-header">目录</div>
-        <div v-if="headings.length === 0" class="toc-empty">无标题</div>
+        <div class="toc-header">Outline</div>
+        <div v-if="headings.length === 0" class="toc-empty">No headings</div>
         <div v-else class="toc-list">
           <button
             v-for="item in headings"

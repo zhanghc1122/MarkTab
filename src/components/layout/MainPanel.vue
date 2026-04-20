@@ -1,10 +1,16 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useTabStore } from "../../stores/tabStore";
+import { useDocumentStats } from "../../composables/useDocumentStats";
 import TabBar from "../editor/TabBar.vue";
 import EditorPane from "../editor/EditorPane.vue";
 import EmptyState from "../editor/EmptyState.vue";
+import StatusBar from "../editor/StatusBar.vue";
 
 const tabStore = useTabStore();
+
+const activeContent = computed(() => tabStore.activeTab?.content ?? "");
+const { stats } = useDocumentStats(activeContent);
 </script>
 
 <template>
@@ -12,6 +18,7 @@ const tabStore = useTabStore();
     <TabBar v-if="tabStore.tabs.length > 0" />
     <EditorPane v-if="tabStore.activeTab" />
     <EmptyState v-else />
+    <StatusBar v-if="tabStore.activeTab" :stats="stats" />
   </main>
 </template>
 

@@ -12,7 +12,7 @@ function openDonation(url: string) {
   <div class="about-overlay" @click.self="emit('close')">
     <div class="about-dialog">
       <div class="about-header">
-        <h2>关于 MarkTab</h2>
+        <h2>About MarkTab</h2>
         <button class="close-btn" @click="emit('close')">&times;</button>
       </div>
 
@@ -20,33 +20,33 @@ function openDonation(url: string) {
         <div class="app-info">
           <div class="app-icon">📝</div>
           <h3>MarkTab</h3>
-          <p class="version">版本 1.0.0</p>
-          <p class="desc">一个简洁高效的 Markdown 编辑器，基于 Tauri 构建，原生性能，快速流畅。</p>
+          <p class="version">Version 1.0.0</p>
+          <p class="desc">A clean and efficient Markdown editor, built with Tauri for native performance and smooth experience.</p>
         </div>
 
         <div class="features">
           <div class="feature-item">
             <span class="feature-icon">⚡</span>
-            <span>原生性能 — Tauri + Vue 3</span>
+            <span>Native Performance — Tauri + Vue 3</span>
           </div>
           <div class="feature-item">
             <span class="feature-icon">📑</span>
-            <span>多标签编辑 — 高效管理多文件</span>
+            <span>Multi-tab Editing — Manage multiple files efficiently</span>
           </div>
           <div class="feature-item">
             <span class="feature-icon">🎨</span>
-            <span>实时预览 — 所见即所得</span>
+            <span>Live Preview — What you see is what you get</span>
           </div>
         </div>
 
         <div class="donation-section">
-          <h4>支持开发</h4>
-          <p class="donation-desc">如果 MarkTab 对你有帮助，欢迎发电支持！</p>
+          <h4>Support Development</h4>
+          <p class="donation-desc">If MarkTab helps you, consider supporting its development!</p>
 
           <div class="donation-buttons">
             <button class="donation-btn afdian" @click="openDonation('https://afdian.net/')">
               <span class="donation-icon">⚡</span>
-              <span>爱发电</span>
+              <span>Afdian</span>
             </button>
             <button class="donation-btn paypal" @click="openDonation('https://www.paypal.me/')">
               <span class="donation-icon">🔵</span>
@@ -54,12 +54,12 @@ function openDonation(url: string) {
             </button>
           </div>
 
-          <p class="donation-hint">点击按钮跳转至捐赠页面</p>
+          <p class="donation-hint">Click a button to open the donation page</p>
         </div>
       </div>
 
       <div class="about-footer">
-        <button class="btn btn-close" @click="emit('close')">关闭</button>
+        <button class="btn btn-close" @click="emit('close')">Close</button>
       </div>
     </div>
   </div>

@@ -40,13 +40,13 @@ function handleSetDefault() {
   <div class="settings-overlay" @click.self="handleCancel">
     <div class="settings-dialog">
       <div class="settings-header">
-        <h2>设置</h2>
+        <h2>Settings</h2>
         <button class="close-btn" @click="handleCancel">&times;</button>
       </div>
 
       <div class="settings-body">
         <div class="setting-item">
-          <label class="setting-label">自动保存延迟</label>
+          <label class="setting-label">Auto Save Delay</label>
           <div class="setting-control">
             <input
               type="range"
@@ -60,7 +60,7 @@ function handleSetDefault() {
         </div>
 
         <div class="setting-item">
-          <label class="setting-label">侧边栏宽度</label>
+          <label class="setting-label">Sidebar Width</label>
           <div class="setting-control">
             <input
               type="range"
@@ -74,7 +74,7 @@ function handleSetDefault() {
         </div>
 
         <div class="setting-item">
-          <label class="setting-label">编辑器字体大小</label>
+          <label class="setting-label">Editor Font Size</label>
           <div class="setting-control">
             <input
               type="range"
@@ -88,43 +88,43 @@ function handleSetDefault() {
         </div>
 
         <div class="setting-item">
-          <label class="setting-label">默认编辑器模式</label>
+          <label class="setting-label">Default Editor Mode</label>
           <div class="setting-control">
             <select v-model="editorMode">
-              <option value="edit">编辑模式</option>
-              <option value="preview">预览模式</option>
+              <option value="edit">Edit Mode</option>
+              <option value="preview">Preview Mode</option>
             </select>
           </div>
         </div>
 
         <div class="setting-item">
-          <label class="setting-label">自动换行</label>
+          <label class="setting-label">Line Wrapping</label>
           <div class="setting-control">
             <input type="checkbox" v-model="lineWrapping" />
-            <span class="setting-value">{{ lineWrapping ? '开启' : '关闭' }}</span>
+            <span class="setting-value">{{ lineWrapping ? 'On' : 'Off' }}</span>
           </div>
         </div>
 
         <div class="setting-item">
-          <label class="setting-label">显示行号</label>
+          <label class="setting-label">Show Line Numbers</label>
           <div class="setting-control">
             <input type="checkbox" v-model="lineNumbers" />
-            <span class="setting-value">{{ lineNumbers ? '开启' : '关闭' }}</span>
+            <span class="setting-value">{{ lineNumbers ? 'On' : 'Off' }}</span>
           </div>
         </div>
 
         <div class="setting-item">
-          <label class="setting-label">默认 Markdown 编辑器</label>
-          <p class="setting-hint">将 MarkTab 设为 .md 文件的默认打开程序</p>
+          <label class="setting-label">Default Markdown Editor</label>
+          <p class="setting-hint">Set MarkTab as the default app for .md files</p>
           <button class="btn btn-outline" @click="handleSetDefault">
-            设为默认应用
+            Set as Default App
           </button>
         </div>
       </div>
 
       <div class="settings-footer">
-        <button class="btn btn-cancel" @click="handleCancel">取消</button>
-        <button class="btn btn-save" @click="handleSave">保存</button>
+        <button class="btn btn-cancel" @click="handleCancel">Cancel</button>
+        <button class="btn btn-save" @click="handleSave">Save</button>
       </div>
     </div>
   </div>

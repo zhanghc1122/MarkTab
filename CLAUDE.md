@@ -99,7 +99,7 @@ Minimal — `src-tauri/src/lib.rs` registers plugins, handles CLI argument forwa
 
 ## Conventions
 
-- UI language is Chinese (zh-CN locale, Chinese text in settings and descriptions)
+- UI language is English
 - Vue components use `<script setup lang="ts">` (Composition API)
 - TypeScript strict mode: `strict: true`, `noUnusedLocals: true`, `noUnusedParameters: true` in tsconfig
 - File paths use `@tauri-apps/plugin-fs` APIs (not Node.js `fs`)

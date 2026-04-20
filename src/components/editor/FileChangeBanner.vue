@@ -22,30 +22,30 @@ const emit = defineEmits<{
   >
     <span class="banner-text">
       <template v-if="tab.externallyDeleted">
-        文件已被删除
+        File has been deleted
       </template>
       <template v-else-if="tab.isDirty">
-        文件已被外部程序修改，本地有未保存的更改
+        File modified externally with unsaved local changes
       </template>
       <template v-else>
-        文件已被外部程序修改
+        File modified externally
       </template>
     </span>
     <div class="banner-actions">
       <template v-if="tab.externallyDeleted">
         <button class="banner-btn btn-close" @click="emit('closeTab')">
-          关闭标签
+          Close Tab
         </button>
         <button class="banner-btn btn-keep" @click="emit('keepLocal')">
-          保留内容
+          Keep Content
         </button>
       </template>
       <template v-else>
         <button class="banner-btn btn-reload" @click="emit('reload')">
-          重新加载
+          Reload
         </button>
         <button class="banner-btn btn-keep" @click="emit('keepLocal')">
-          保留当前
+          Keep Current
         </button>
       </template>
     </div>

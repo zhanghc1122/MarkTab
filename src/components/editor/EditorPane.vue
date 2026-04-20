@@ -89,7 +89,7 @@ function handleCloseTab() {
           class="reload-btn"
           @click="handleReload"
           :disabled="isReloading"
-          title="重新加载文件 (Ctrl+Shift+R)"
+          title="Reload file (Ctrl+Shift+R)"
         >
           <svg
             width="14"
