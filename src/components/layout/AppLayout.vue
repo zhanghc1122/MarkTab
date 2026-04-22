@@ -6,6 +6,7 @@ import { useAppConfigStore } from "../../stores/appConfigStore";
 import { useFileStore } from "../../stores/fileStore";
 import { useTabStore } from "../../stores/tabStore";
 import { useEditorStore } from "../../stores/editorStore";
+import { useDirectoryStore } from "../../stores/directoryStore";
 import { useAutoSave } from "../../composables/useAutoSave";
 import { useKeyboardShortcuts } from "../../composables/useKeyboardShortcuts";
 import { useExternalFileOpen } from "../../composables/useExternalFileOpen";
@@ -15,6 +16,7 @@ const configStore = useAppConfigStore();
 const fileStore = useFileStore();
 const tabStore = useTabStore();
 const editorStore = useEditorStore();
+const dirStore = useDirectoryStore();
 
 const activeTab = computed(() => tabStore.activeTab);
 
@@ -52,6 +54,12 @@ function startResize(e: MouseEvent) {
 onMounted(async () => {
   await configStore.init();
   fileStore.loadFromConfig(configStore.config.recentFiles);
+  dirStore.loadFromConfig(
+    configStore.config.favoriteDirs,
+    configStore.config.recentDirs,
+    configStore.config.dirSortField,
+    configStore.config.dirSortOrder,
+  );
   editorStore.setMode(configStore.config.preferences.editorMode);
 });
 </script>

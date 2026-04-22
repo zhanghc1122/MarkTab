@@ -1,8 +1,13 @@
+import type { DirectoryEntry, SortField, SortOrder } from "./directory";
 import type { FileEntry } from "./file";
 
 export interface AppConfig {
   version: number;
   recentFiles: FileEntry[];
+  favoriteDirs: DirectoryEntry[];
+  recentDirs: DirectoryEntry[];
+  dirSortField: SortField;
+  dirSortOrder: SortOrder;
   preferences: {
     autoSaveDelay: number;
     sidebarWidth: number;
@@ -16,6 +21,10 @@ export interface AppConfig {
 export const DEFAULT_CONFIG: AppConfig = {
   version: 1,
   recentFiles: [],
+  favoriteDirs: [],
+  recentDirs: [],
+  dirSortField: "name",
+  dirSortOrder: "asc",
   preferences: {
     autoSaveDelay: 2000,
     sidebarWidth: 260,
