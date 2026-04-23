@@ -2,10 +2,6 @@
 const emit = defineEmits<{
   close: [];
 }>();
-
-function openDonation(url: string) {
-  window.open(url, "_blank");
-}
 </script>
 
 <template>

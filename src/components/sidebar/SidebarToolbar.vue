@@ -1,65 +1,215 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { useFileStore } from "../../stores/fileStore";
-import { useTabStore } from "../../stores/tabStore";
-import { readFileContent, openFileDialog } from "../../services/fileIoService";
-import SettingsDialog from "../settings/SettingsDialog.vue";
-import AboutDialog from "../settings/AboutDialog.vue";
+import type { SidebarView } from "../../types/config";
+import type { SortField, SortOrder } from "../../types/directory";
+import SortBar, { type SortFieldDef } from "./SortBar.vue";
+import { useDirectoryStore } from "../../stores/directoryStore";
 
-const fileStore = useFileStore();
-const tabStore = useTabStore();
-const showSettings = ref(false);
-const showAbout = ref(false);
+type SessionSortField = "time" | "project" | "messages";
 
-async function handleOpenFile() {
-  const path = await openFileDialog();
-  if (!path) return;
-  const content = await readFileContent(path);
-  const entry = fileStore.addFile(path);
-  tabStore.openTab(entry, content);
-  fileStore.persistState();
-}
+defineProps<{
+  view: SidebarView;
+  fileSortField: SortField;
+  fileSortOrder: SortOrder;
+  sessionSortField: SessionSortField;
+  sessionSortOrder: SortOrder;
+  sessionSearchQuery: string;
+}>();
 
+const emit = defineEmits<{
+  "update:fileSortField": [value: SortField];
+  "update:fileSortOrder": [value: SortOrder];
+  "update:sessionSortField": [value: SessionSortField];
+  "update:sessionSortOrder": [value: SortOrder];
+  "update:sessionSearchQuery": [value: string];
+  openFile: [];
+  addFolder: [];
+  refreshSessions: [];
+}>();
+
+const dirStore = useDirectoryStore();
+
+const fileSortFields: SortFieldDef[] = [
+  { key: "name", title: "Sort by name", defaultOrder: "asc" },
+  { key: "time", title: "Sort by time", defaultOrder: "desc" },
+];
+
+const sessionSortFields: SortFieldDef[] = [
+  { key: "time", title: "Sort by time", defaultOrder: "desc" },
+  { key: "project", title: "Sort by project", defaultOrder: "asc" },
+  { key: "messages", title: "Sort by messages", defaultOrder: "desc" },
+];
 </script>
 
 <template>
-  <div class="toolbar">
-    <button class="toolbar-btn" title="Open File (Ctrl+O)" @click="handleOpenFile">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5v-9zM2.5 3a.5.5 0 0 0-.5.5V6h12v-.5a.5.5 0 0 0-.5-.5H9c-.964 0-1.71-.629-2.174-1.154C6.374 3.334 5.82 3 5.264 3H2.5zM14 7H2v5.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V7z"/>
-      </svg>
-    </button>
-    <div style="flex:1"></div>
-    <button class="toolbar-btn" title="Settings" @click="showSettings = true">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
-        <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.186l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.186 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.186l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.186-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
-      </svg>
-    </button>
-    <button class="toolbar-btn" title="About" @click="showAbout = true">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 14.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13zM8 3a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1zm0 8a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-      </svg>
-    </button>
+  <div v-if="view !== 'skills'" class="sidebar-toolbar">
+    <div class="toolbar-left">
+      <button
+        v-if="view === 'files' || view === 'quickAccess'"
+        class="icon-btn"
+        title="Open File (Ctrl+O)"
+        @click="emit('openFile')"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+          <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+        </svg>
+      </button>
+      <button
+        v-if="view === 'quickAccess'"
+        class="icon-btn"
+        title="Add folder to favorites"
+        @click="emit('addFolder')"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3H13.5a2 2 0 0 1 2 1.99V13a2 2 0 0 1-2 2H2.5a2 2 0 0 1-2-2V5.01a2 2 0 0 1 .04-.14ZM1 5v8a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 15 13V5a1.5 1.5 0 0 0-1.5-1.5H2.5A1.5 1.5 0 0 0 1 5z"/>
+        </svg>
+      </button>
+      <button
+        v-if="view === 'sessions'"
+        class="icon-btn"
+        title="Refresh sessions"
+        @click="emit('refreshSessions')"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+          <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="toolbar-right">
+      <template v-if="view === 'files'">
+        <SortBar
+          :field="fileSortField"
+          :order="fileSortOrder"
+          :fields="fileSortFields"
+          @update:field="emit('update:fileSortField', $event as SortField)"
+          @update:order="emit('update:fileSortOrder', $event)"
+        >
+          <template #icon-name>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M1.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0v-6a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5z"/>
+            </svg>
+          </template>
+          <template #icon-time>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+              <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+            </svg>
+          </template>
+        </SortBar>
+      </template>
+      <template v-else-if="view === 'quickAccess'">
+        <SortBar
+          :field="dirStore.sortField"
+          :order="dirStore.sortOrder"
+          :fields="fileSortFields"
+          @update:field="dirStore.sortField = $event as SortField"
+          @update:order="dirStore.sortOrder = $event"
+        >
+          <template #icon-name>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M1.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0v-6a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5z"/>
+            </svg>
+          </template>
+          <template #icon-time>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+              <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+            </svg>
+          </template>
+        </SortBar>
+      </template>
+      <template v-else-if="view === 'sessions'">
+        <SortBar
+          :field="sessionSortField"
+          :order="sessionSortOrder"
+          :fields="sessionSortFields"
+          @update:field="emit('update:sessionSortField', $event as SessionSortField)"
+          @update:order="emit('update:sessionSortOrder', $event)"
+        >
+          <template #icon-time>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+              <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+            </svg>
+          </template>
+          <template #icon-project>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M1.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0v-6a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5z"/>
+            </svg>
+          </template>
+          <template #icon-messages>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.854V2z"/>
+            </svg>
+          </template>
+        </SortBar>
+      </template>
+    </div>
+    <div v-if="view === 'sessions'" class="toolbar-search">
+      <input
+        :value="sessionSearchQuery"
+        type="text"
+        placeholder="Search sessions..."
+        class="search-input"
+        @input="emit('update:sessionSearchQuery', ($event.target as HTMLInputElement).value)"
+      />
+    </div>
   </div>
-  <SettingsDialog v-if="showSettings" @close="showSettings = false" />
-  <AboutDialog v-if="showAbout" @close="showAbout = false" />
 </template>
 
 <style scoped>
-.toolbar {
+.sidebar-toolbar {
   display: flex;
-  gap: 2px;
-  padding: 6px 8px;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
   border-bottom: 1px solid #e0e0e0;
 }
 
-.toolbar-btn {
+.toolbar-left {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.toolbar-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.toolbar-search {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-input {
+  width: 100%;
+  padding: 3px 6px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 12px;
+  outline: none;
+  background: #fff;
+  color: #374151;
+  box-sizing: border-box;
+}
+
+.search-input:focus {
+  border-color: #7c3aed;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border: none;
   border-radius: 4px;
   background: transparent;
@@ -68,8 +218,8 @@ async function handleOpenFile() {
   transition: all 0.15s;
 }
 
-.toolbar-btn:hover {
-  background: #e0e0e0;
-  color: #1f2937;
+.icon-btn:hover {
+  background: #e5e7eb;
+  color: #7c3aed;
 }
 </style>
