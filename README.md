@@ -2,6 +2,8 @@
 
 A tabbed Markdown editor for Windows, built with Tauri v2 + Vue 3.
 
+![MarkTab Screenshot](MarkTab.png)
+
 ## Features
 
 - Tabbed editing — open multiple Markdown files in tabs
