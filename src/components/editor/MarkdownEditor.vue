@@ -13,6 +13,8 @@ const props = withDefaults(defineProps<{
   fontSize?: number;
   lineWrapping?: boolean;
   lineNumbers?: boolean;
+  restoreScrollTop?: number;
+  restoreCursorPos?: number;
 }>(), {
   fontSize: 14,
   lineWrapping: true,
@@ -105,6 +107,20 @@ watch(
       ignoreNextUpdate = true;
       view.setState(createState(newVal));
       ignoreNextUpdate = false;
+
+      // Restore scroll position and cursor after tab switch
+      if (props.restoreScrollTop || props.restoreCursorPos) {
+        requestAnimationFrame(() => {
+          if (!view) return;
+          if (props.restoreCursorPos) {
+            const pos = Math.min(props.restoreCursorPos, view.state.doc.length);
+            view.dispatch({ selection: { anchor: pos } });
+          }
+          if (props.restoreScrollTop) {
+            view.scrollDOM.scrollTop = props.restoreScrollTop;
+          }
+        });
+      }
     }
   }
 );

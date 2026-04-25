@@ -20,15 +20,14 @@ const md = new MarkdownIt({
   },
 });
 
-// Heading counter for TOC id generation
-let headingCounter = 0;
-
 // Custom heading renderer to add id attributes for TOC navigation
 const defaultHeadingOpen = md.renderer.rules.heading_open;
 md.renderer.rules.heading_open = (tokens, idx, options, env, self) => {
+  const envObj = env as { headingCounter?: number };
+  if (envObj.headingCounter === undefined) envObj.headingCounter = 0;
   const token = tokens[idx];
-  token.attrSet("id", `toc-heading-${headingCounter}`);
-  headingCounter++;
+  token.attrSet("id", `toc-heading-${envObj.headingCounter}`);
+  envObj.headingCounter++;
   return defaultHeadingOpen
     ? defaultHeadingOpen(tokens, idx, options, env, self)
     : self.renderToken(tokens, idx, options);
@@ -109,7 +108,6 @@ md.renderer.rules.image = (tokens, idx, options, env, self) => {
 };
 
 export function renderMarkdown(source: string, filePath?: string): string {
-  headingCounter = 0;
   return md.render(source, { filePath });
 }
 

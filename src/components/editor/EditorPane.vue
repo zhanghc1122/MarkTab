@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useTabStore } from "../../stores/tabStore";
 import { useEditorStore } from "../../stores/editorStore";
 import { useAppConfigStore } from "../../stores/appConfigStore";
@@ -9,6 +9,7 @@ import MarkdownEditor from "./MarkdownEditor.vue";
 import MarkdownPreview from "./MarkdownPreview.vue";
 import TableOfContents from "./TableOfContents.vue";
 import FileChangeBanner from "./FileChangeBanner.vue";
+import SessionDetail from "./SessionDetail.vue";
 import type { EditorView } from "@codemirror/view";
 
 const tabStore = useTabStore();
@@ -18,6 +19,8 @@ const configStore = useAppConfigStore();
 const prefs = computed(() => configStore.config.preferences);
 
 const activeTab = computed(() => tabStore.activeTab);
+
+const isSessionTab = computed(() => activeTab.value?.filePath.startsWith("session://") ?? false);
 
 const hasExternalChange = computed(
   () =>
@@ -38,6 +41,16 @@ const editorView = computed<EditorView | null>(() => {
 
 const previewScrollContainer = computed<HTMLElement | undefined>(() => {
   return previewComponentRef.value?.getScrollContainer?.();
+});
+
+// Save scroll/cursor state before switching tabs
+watch(() => tabStore.activeTabId, (_newId, oldId) => {
+  if (!oldId) return;
+  const view = editorComponentRef.value?.getView?.();
+  if (!view) return;
+  const scrollTop = view.scrollDOM.scrollTop;
+  const cursorPos = view.state.selection.main.head;
+  tabStore.saveTabScrollState(oldId, scrollTop, cursorPos);
 });
 
 function handleContentChange(content: string) {
@@ -81,6 +94,16 @@ function handleCloseTab() {
 
 <template>
   <div class="editor-pane" v-if="activeTab">
+    <!-- Session tab: show SessionDetail -->
+    <template v-if="isSessionTab">
+      <div class="editor-toolbar">
+        <span class="file-path" :title="activeTab.filePath">{{ activeTab.fileName }}</span>
+      </div>
+      <SessionDetail :tab="activeTab" />
+    </template>
+
+    <!-- File tab: show editor/preview -->
+    <template v-else>
     <div class="editor-toolbar">
       <span class="file-path" :title="activeTab.filePath">{{ activeTab.fileName }}</span>
       <div class="toolbar-right">
@@ -134,6 +157,8 @@ function handleCloseTab() {
         :font-size="prefs.fontSize ?? 14"
         :line-wrapping="prefs.lineWrapping ?? true"
         :line-numbers="prefs.lineNumbers ?? true"
+        :restore-scroll-top="activeTab.scrollTop"
+        :restore-cursor-pos="activeTab.cursorPos"
         @update:model-value="handleContentChange"
       />
       <MarkdownPreview
@@ -149,6 +174,7 @@ function handleCloseTab() {
         :editor-view="editorView"
       />
     </div>
+    </template>
   </div>
 </template>
 

@@ -34,24 +34,6 @@ const emit = defineEmits<{
             <span>Live Preview — What you see is what you get</span>
           </div>
         </div>
-
-        <div class="donation-section">
-          <h4>Support Development</h4>
-          <p class="donation-desc">If MarkTab helps you, consider supporting its development!</p>
-
-          <div class="donation-buttons">
-            <button class="donation-btn afdian" @click="openDonation('https://afdian.net/')">
-              <span class="donation-icon">⚡</span>
-              <span>Afdian</span>
-            </button>
-            <button class="donation-btn paypal" @click="openDonation('https://www.paypal.me/')">
-              <span class="donation-icon">🔵</span>
-              <span>PayPal</span>
-            </button>
-          </div>
-
-          <p class="donation-hint">Click a button to open the donation page</p>
-        </div>
       </div>
 
       <div class="about-footer">
@@ -162,70 +144,6 @@ const emit = defineEmits<{
 
 .feature-icon {
   font-size: 14px;
-}
-
-.donation-section {
-  text-align: center;
-}
-
-.donation-section h4 {
-  margin: 0 0 4px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.donation-desc {
-  margin: 0 0 12px;
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.donation-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.donation-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.donation-btn.afdian {
-  background: #7c3aed;
-  color: #fff;
-}
-
-.donation-btn.afdian:hover {
-  background: #6d28d9;
-}
-
-.donation-btn.paypal {
-  background: #0070ba;
-  color: #fff;
-}
-
-.donation-btn.paypal:hover {
-  background: #005ea6;
-}
-
-.donation-icon {
-  font-size: 16px;
-}
-
-.donation-hint {
-  margin: 8px 0 0;
-  font-size: 11px;
-  color: #9ca3af;
 }
 
 .about-footer {

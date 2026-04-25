@@ -30,7 +30,11 @@ export async function loadConfig(): Promise<AppConfig> {
     }
     const raw = await readTextFile(path);
     const config = JSON.parse(raw) as AppConfig;
-    return { ...DEFAULT_CONFIG, ...config };
+    return {
+      ...DEFAULT_CONFIG,
+      ...config,
+      preferences: { ...DEFAULT_CONFIG.preferences, ...config.preferences },
+    };
   } catch {
     return { ...DEFAULT_CONFIG };
   }
