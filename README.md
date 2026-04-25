@@ -18,12 +18,13 @@ A lightweight, tabbed Markdown editor for Windows. Built with Tauri v2 + Vue 3 +
 - **Keyboard shortcuts** — Ctrl+O/W/S/Tab and more
 - **Windows file association** — Double-click `.md` files to open in MarkTab
 - **Check for updates** — Auto-check on startup, manual check in About dialog
+- **About dialog** — App info with GitHub repository link
 
 ## Download
 
 Download the latest installer from the [Releases](../../releases) page.
 
-- **MSI installer** — `MarkTab_x.x.x_x64_en-US.mi`
+- **MSI installer** — `MarkTab_1.2.1_x64_en-US.msi`
 - **Portable EXE** — `marktab.exe` (~15 MB, standalone, no dependencies)
 
 ## Development

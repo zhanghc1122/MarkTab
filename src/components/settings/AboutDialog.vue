@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { open } from "@tauri-apps/plugin-shell";
 import { useUpdateChecker } from "../../composables/useUpdateChecker";
 import UpdateDialog from "./UpdateDialog.vue";
+
+const GITHUB_REPO = "zhanghc1122/MarkTab";
 
 const emit = defineEmits<{
   close: [];
@@ -33,6 +36,9 @@ async function handleCheckUpdate() {
           <h3>MarkTab</h3>
           <p class="version">Version {{ appVersion }}</p>
           <p class="desc">A clean and efficient Markdown editor, built with Tauri for native performance and smooth experience.</p>
+          <a class="repo-link" href="#" @click.prevent="open(`https://github.com/${GITHUB_REPO}`)">
+            github.com/{{ GITHUB_REPO }}
+          </a>
         </div>
 
         <div class="features">
@@ -148,6 +154,18 @@ async function handleCheckUpdate() {
   font-size: 13px;
   color: #6b7280;
   line-height: 1.5;
+}
+
+.repo-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #7c3aed;
+  text-decoration: none;
+}
+
+.repo-link:hover {
+  text-decoration: underline;
 }
 
 .features {
