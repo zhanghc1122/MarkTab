@@ -1,6 +1,8 @@
 import type { DirectoryEntry, SortField, SortOrder } from "./directory";
 import type { FileEntry } from "./file";
 
+export type SidebarView = "files" | "quickAccess" | "sessions" | "skills";
+
 export interface AppConfig {
   version: number;
   recentFiles: FileEntry[];
@@ -11,6 +13,7 @@ export interface AppConfig {
   preferences: {
     autoSaveDelay: number;
     sidebarWidth: number;
+    sidebarView: SidebarView;
     editorMode: "edit" | "preview";
     fontSize: number;
     lineWrapping: boolean;
@@ -28,6 +31,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   preferences: {
     autoSaveDelay: 2000,
     sidebarWidth: 260,
+    sidebarView: "files",
     editorMode: "edit",
     fontSize: 14,
     lineWrapping: true,

@@ -1,4 +1,4 @@
-import { readTextFile, writeTextFile, exists } from "@tauri-apps/plugin-fs";
+import { readTextFile, writeTextFile, exists, readDir } from "@tauri-apps/plugin-fs";
 import { open, save } from "@tauri-apps/plugin-dialog";
 
 export const selfWriteTimestamps = new Map<string, number>();
@@ -45,4 +45,14 @@ export async function saveFileDialog(
       },
     ],
   });
+}
+
+export async function openDirectoryDialog(): Promise<string | null> {
+  const selected = await open({ directory: true, multiple: false });
+  if (selected === null) return null;
+  return typeof selected === "string" ? selected : selected;
+}
+
+export async function readDirectory(dirPath: string) {
+  return await readDir(dirPath);
 }

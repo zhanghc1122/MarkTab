@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import type { AppConfig } from "../types/config";
+import type { AppConfig, SidebarView } from "../types/config";
 import { DEFAULT_CONFIG } from "../types/config";
 import { loadConfig, saveConfig } from "../services/configService";
 
@@ -42,6 +42,10 @@ export const useAppConfigStore = defineStore("appConfig", () => {
     config.value.preferences.lineNumbers = shown;
   }
 
+  function setSidebarView(view: SidebarView) {
+    config.value.preferences.sidebarView = view;
+  }
+
   return {
     config,
     initialized,
@@ -53,5 +57,6 @@ export const useAppConfigStore = defineStore("appConfig", () => {
     setFontSize,
     setLineWrapping,
     setLineNumbers,
+    setSidebarView,
   };
 });

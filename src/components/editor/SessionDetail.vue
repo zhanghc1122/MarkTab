@@ -1,28 +1,29 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import type { SessionTab } from "../../types/tab";
+import type { TabState } from "../../types/tab";
 import { useSessions } from "../../composables/useSessions";
 
-const props = defineProps<{ tab: SessionTab }>();
+const props = defineProps<{ tab: TabState }>();
 
 const { sessions, resumeSession } = useSessions();
 
+const sessionId = computed(() => {
+  const match = props.tab.filePath.match(/^session:\/\/(.+)$/);
+  return match ? match[1] : "";
+});
+
 const sessionEntry = computed(() =>
-  sessions.value.find((s) => s.sessionId === props.tab.sessionId)
+  sessions.value.find((s) => s.sessionId === sessionId.value)
 );
 
 function handleOpenTerminal() {
-  resumeSession(props.tab.sessionId, props.tab.projectPath);
+  if (sessionEntry.value) {
+    resumeSession(sessionEntry.value.sessionId, sessionEntry.value.projectPath);
+  }
 }
 
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString();
-}
-
-function projectName(path: string): string {
-  if (!path) return "";
-  const parts = path.replace(/\\/g, "/").split("/");
-  return parts[parts.length - 1] || path;
 }
 </script>
 
@@ -39,7 +40,7 @@ function projectName(path: string): string {
       <div class="sd-meta">
         <div class="sd-row">
           <span class="sd-label">Project</span>
-          <span class="sd-value sd-path">{{ tab.projectPath }}</span>
+          <span class="sd-value sd-path">{{ sessionEntry?.projectPath ?? '' }}</span>
         </div>
         <div class="sd-row" v-if="sessionEntry">
           <span class="sd-label">Last Activity</span>
@@ -58,7 +59,7 @@ function projectName(path: string): string {
         </div>
         <div class="sd-row">
           <span class="sd-label">Session ID</span>
-          <span class="sd-value sd-mono">{{ tab.sessionId }}</span>
+          <span class="sd-value sd-mono">{{ sessionId }}</span>
         </div>
       </div>
 
