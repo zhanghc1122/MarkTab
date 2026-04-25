@@ -1,7 +1,22 @@
 <script setup lang="ts">
+import { ref } from "vue";
+import { useUpdateChecker } from "../../composables/useUpdateChecker";
+import UpdateDialog from "./UpdateDialog.vue";
+
 const emit = defineEmits<{
   close: [];
 }>();
+
+const { updateInfo, checking, checkForUpdate, openReleasePage } = useUpdateChecker();
+const showUpdateDialog = ref(false);
+const appVersion = __APP_VERSION__;
+
+async function handleCheckUpdate() {
+  const result = await checkForUpdate(false);
+  if (result) {
+    showUpdateDialog.value = true;
+  }
+}
 </script>
 
 <template>
@@ -16,7 +31,7 @@ const emit = defineEmits<{
         <div class="app-info">
           <div class="app-icon">📝</div>
           <h3>MarkTab</h3>
-          <p class="version">Version 1.0.0</p>
+          <p class="version">Version {{ appVersion }}</p>
           <p class="desc">A clean and efficient Markdown editor, built with Tauri for native performance and smooth experience.</p>
         </div>
 
@@ -37,10 +52,19 @@ const emit = defineEmits<{
       </div>
 
       <div class="about-footer">
+        <button class="btn btn-check-update" :disabled="checking" @click="handleCheckUpdate">
+          {{ checking ? 'Checking...' : 'Check for Updates' }}
+        </button>
         <button class="btn btn-close" @click="emit('close')">Close</button>
       </div>
     </div>
   </div>
+  <UpdateDialog
+    v-if="showUpdateDialog && updateInfo"
+    :info="updateInfo"
+    @close="showUpdateDialog = false"
+    @download="openReleasePage"
+  />
 </template>
 
 <style scoped>
@@ -151,6 +175,7 @@ const emit = defineEmits<{
   border-top: 1px solid #e5e7eb;
   display: flex;
   justify-content: center;
+  gap: 8px;
 }
 
 .btn-close {
@@ -166,5 +191,25 @@ const emit = defineEmits<{
 
 .btn-close:hover {
   background: #e5e7eb;
+}
+
+.btn-check-update {
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+}
+
+.btn-check-update:hover:not(:disabled) {
+  background: #6d28d9;
+}
+
+.btn-check-update:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

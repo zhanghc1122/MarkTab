@@ -11,6 +11,8 @@ import { useAutoSave } from "../../composables/useAutoSave";
 import { useKeyboardShortcuts } from "../../composables/useKeyboardShortcuts";
 import { useExternalFileOpen } from "../../composables/useExternalFileOpen";
 import { useFileWatcher } from "../../composables/useFileWatcher";
+import { useUpdateChecker } from "../../composables/useUpdateChecker";
+import UpdateDialog from "../settings/UpdateDialog.vue";
 
 const configStore = useAppConfigStore();
 const fileStore = useFileStore();
@@ -26,6 +28,9 @@ useExternalFileOpen();
 useFileWatcher();
 
 const isResizing = ref(false);
+const showUpdateDialog = ref(false);
+
+const { updateInfo, checkForUpdate, openReleasePage } = useUpdateChecker();
 
 function startResize(e: MouseEvent) {
   e.preventDefault();
@@ -61,6 +66,12 @@ onMounted(async () => {
     configStore.config.dirSortOrder,
   );
   editorStore.setMode(configStore.config.preferences.editorMode);
+
+  // Auto-check for updates on startup (silent)
+  const result = await checkForUpdate(true);
+  if (result?.hasUpdate) {
+    showUpdateDialog.value = true;
+  }
 });
 </script>
 
@@ -69,6 +80,12 @@ onMounted(async () => {
     <Sidebar />
     <div class="resize-handle" @mousedown="startResize"></div>
     <MainPanel />
+    <UpdateDialog
+      v-if="showUpdateDialog && updateInfo"
+      :info="updateInfo"
+      @close="showUpdateDialog = false"
+      @download="openReleasePage"
+    />
   </div>
 </template>
 
