@@ -15,11 +15,11 @@ npm run build        # vue-tsc --noEmit && vite build
 npx tauri build
 
 # Output locations:
-#   EXE: src-tauri/target/release/marktab.exe  (~11MB, standalone, no DLL dependencies)
+#   EXE: src-tauri/target/release/marktab.exe  (~15MB, standalone, no DLL dependencies)
 #   MSI: src-tauri/target/release/bundle/msi/
 ```
 
-**Note:** `target/release/` 会达到 ~1.4GB，但绝大多数是 Cargo 编译缓存（deps/ 中的 .rlib/.rmeta）。分发给用户只需要 `marktab.exe`（~11MB），它是静态链接的独立可执行文件。用 `cargo clean` 可安全清理整个 target 目录（只影响下次编译速度）。
+**Note:** `target/release/` 会达到 ~1.4GB，但绝大多数是 Cargo 编译缓存（deps/ 中的 .rlib/.rmeta）。分发给用户只需要 `marktab.exe`（~15MB），它是静态链接的独立可执行文件。用 `cargo clean` 可安全清理整个 target 目录（只影响下次编译速度）。
 
 **Starting Tauri dev/build from Claude Code (bash):**
 
@@ -57,6 +57,8 @@ AppConfig (JSON in appDataDir)
         └── lineNumbers
 
 Active Tab Content → useAutoSave (debounced) → writeFileContent → disk
+
+Update Check → useUpdateChecker (GitHub Releases API) → shell.open(releaseUrl) → browser
 ```
 
 All stores use Pinia Composition API style. `fileStore.persistState()` serializes runtime state back through `appConfigStore` to the JSON config file. Five stores total: `appConfigStore` (preferences & config persistence), `fileStore` (file list & recent files), `tabStore` (open tabs, active tab, dirty state), `editorStore` (CodeMirror instance & editor-specific state), `directoryStore` (favorite/recent directories & directory tree).
@@ -65,17 +67,17 @@ All stores use Pinia Composition API style. `fileStore.persistState()` serialize
 
 ```
 src/
-  components/       editor/ (MarkdownEditor, TabBar, TabItem, EditorPane, FileChangeBanner)
-                    layout/ (AppLayout, Sidebar)
-                    settings/ (SettingsDialog)
-                    sidebar/ (FileTree, FileTreeItem, SidebarToolbar, QuickAccess, DirNode, DirFileNode)
-  composables/      useAutoSave, useExternalFileOpen, useFileDialog, useFileWatcher, useKeyboardShortcuts, useDirectoryTree
+  components/       editor/ (MarkdownEditor, MarkdownPreview, TabBar, TabItem, EditorPane, EmptyState, StatusBar, TableOfContents, FileChangeBanner)
+                    layout/ (AppLayout, MainPanel, Sidebar)
+                    settings/ (SettingsDialog, AboutDialog, UpdateDialog)
+                    sidebar/ (FileTree, FileTreeItem, SidebarToolbar, SidebarHeader, QuickAccess, SortBar, DirNode, DirFileNode)
+  composables/      useAutoSave, useExternalFileOpen, useFileDialog, useFileWatcher, useKeyboardShortcuts, useDirectoryTree, useDocumentStats, useTableOfContents, useUpdateChecker
   services/         configService (config file read/write)
                     fileIoService (file open/read/write via Tauri FS plugin)
-                    markdownService (markdown-it rendering + highlight.js)
+                    markdownService (markdown-it rendering + highlight.js + mermaid + draw.io)
   stores/           appConfigStore, fileStore, tabStore, editorStore, directoryStore
   types/            config.ts, file.ts, tab.ts, directory.ts
-  utils/            debounce.ts, pathUtils.ts
+  utils/            pathUtils.ts
 ```
 
 ### File Opening Paths
@@ -93,9 +95,9 @@ Minimal — `src-tauri/src/lib.rs` registers plugins and handles CLI argument fo
 ### Key Dependencies
 
 - **Editor:** CodeMirror 6 (direct, not via vue-codemirror) + `@codemirror/lang-markdown`
-- **Preview:** `markdown-it` + `highlight.js`
+- **Preview:** `markdown-it` + `highlight.js` + `mermaid` (diagrams) + draw.io (inline SVG)
 - **Styling:** Tailwind CSS v4 via `@tailwindcss/vite`
-- **Tauri Plugins:** `fs`, `dialog`, `window-state`, `single-instance`
+- **Tauri Plugins:** `fs`, `dialog`, `shell`, `window-state`, `single-instance`
 
 ## Conventions
 
@@ -106,6 +108,32 @@ Minimal — `src-tauri/src/lib.rs` registers plugins and handles CLI argument fo
 - Tab dirty state: tracked by comparing `content` vs `originalContent` in `TabState` (managed by `tabStore`)
 - CodeMirror extensions that may change at runtime (theme, lineWrapping, lineNumbers) use the `Compartment` pattern in `MarkdownEditor.vue` — dispatch `compartment.reconfigure()` via watchers instead of rebuilding `EditorState`
 - No test framework is set up — no vitest/jest/cypress/playwright config or test files exist
+
+## Release Workflow
+
+When publishing a new version, these steps must all be done:
+
+1. **Update version number** in all four locations:
+   - `package.json` — `"version": "x.y.z"`
+   - `src-tauri/Cargo.toml` — `version = "x.y.z"`
+   - `src-tauri/Cargo.lock` — find `name = "marktab"` entry and update its `version`
+   - `src-tauri/tauri.conf.json` — `"version": "x.y.z"`
+
+2. **Update README.md** — reflect new features, fix MSI filename pattern (`MarkTab_x.y.z_x64_en-US.msi`)
+
+3. **Build** — `npx tauri build` (with MSVC env vars as described above)
+
+4. **Commit & push** — commit all changes, push to `github` remote, create git tag `vx.y.z`
+
+5. **Create GitHub Release** — use `gh release create vx.y.z` with EXE + MSI assets:
+   ```bash
+   "/c/Program Files/GitHub CLI/gh.exe" release create vx.y.z \
+     "src-tauri/target/release/marktab.exe" \
+     "src-tauri/target/release/bundle/msi/MarkTab_x.y.z_x64_en-US.msi" \
+     --title "vx.y.z" --notes "..."
+   ```
+
+The update checker (`useUpdateChecker`) reads the GitHub Releases API, so a new release must exist on GitHub for users to see update notifications.
 
 ## Tauri Config Notes
 
