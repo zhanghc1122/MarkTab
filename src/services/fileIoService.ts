@@ -1,5 +1,6 @@
-import { readTextFile, writeTextFile, exists, readDir } from "@tauri-apps/plugin-fs";
+import { readTextFile, writeTextFile, exists, readDir, stat, writeFile, mkdir } from "@tauri-apps/plugin-fs";
 import { open, save } from "@tauri-apps/plugin-dialog";
+import { generateId, extractParentDir, extractBaseName } from "../utils/pathUtils";
 
 export const selfWriteTimestamps = new Map<string, number>();
 
@@ -55,4 +56,24 @@ export async function openDirectoryDialog(): Promise<string | null> {
 
 export async function readDirectory(dirPath: string) {
   return await readDir(dirPath);
+}
+
+export async function statFile(path: string) {
+  return await stat(path);
+}
+
+export async function saveImageToAssets(
+  mdFilePath: string,
+  imageData: Uint8Array,
+  imageExt: string
+): Promise<string> {
+  const parentDir = extractParentDir(mdFilePath);
+  if (!parentDir) throw new Error("Cannot determine parent directory");
+  const baseName = extractBaseName(mdFilePath);
+  const assetsDir = `${parentDir}/${baseName}.assets`;
+  await mkdir(assetsDir, { recursive: true });
+  const imageName = `image-${Date.now()}-${generateId().slice(0, 6)}.${imageExt}`;
+  const imagePath = `${assetsDir}/${imageName}`;
+  await writeFile(imagePath, imageData);
+  return `./${baseName}.assets/${imageName}`;
 }

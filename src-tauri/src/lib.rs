@@ -30,31 +30,9 @@ pub fn run() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![open_default_apps_settings, resume_claude_session])
+        .invoke_handler(tauri::generate_handler![])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-/// Open Windows Settings -> Default Apps page so the user can set MarkTab as the default .md editor.
-#[tauri::command]
-fn open_default_apps_settings() {
-    let _ = std::process::Command::new("cmd")
-        .args(["/c", "start", "ms-settings:defaultapps"])
-        .spawn();
-}
-
-/// Resume a Claude Code session by opening a terminal in the project directory.
-#[tauri::command]
-fn resume_claude_session(session_id: String, cwd: String) {
-    let cwd_arg = if cwd.is_empty() {
-        String::new()
-    } else {
-        format!("cd /d \"{}\" && ", cwd)
-    };
-    let cmd_str = format!("{}claude --resume {}", cwd_arg, session_id);
-    let _ = std::process::Command::new("cmd")
-        .args(["/c", "start", "cmd", "/k", &cmd_str])
-        .spawn();
 }
 
 /// Extract file path from command-line arguments.

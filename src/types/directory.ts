@@ -11,6 +11,8 @@ export interface DirectoryChild {
   name: string;
   filePath: string;
   mtime: number | null;
+  isDir?: boolean;
+  children?: DirectoryChild[];
 }
 
 export interface DirectoryNode {

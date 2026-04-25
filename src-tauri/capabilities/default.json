@@ -18,6 +18,14 @@
       "allow": [{ "path": "$APPDATA/**" }, { "path": "**" }]
     },
     {
+      "identifier": "fs:allow-write-file",
+      "allow": [{ "path": "$APPDATA/**" }, { "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [{ "path": "$APPDATA/**" }, { "path": "**" }]
+    },
+    {
       "identifier": "fs:allow-exists",
       "allow": [{ "path": "$APPDATA/**" }, { "path": "**" }]
     },

@@ -9,7 +9,6 @@ import MarkdownEditor from "./MarkdownEditor.vue";
 import MarkdownPreview from "./MarkdownPreview.vue";
 import TableOfContents from "./TableOfContents.vue";
 import FileChangeBanner from "./FileChangeBanner.vue";
-import SessionDetail from "./SessionDetail.vue";
 import type { EditorView } from "@codemirror/view";
 
 const tabStore = useTabStore();
@@ -19,8 +18,6 @@ const configStore = useAppConfigStore();
 const prefs = computed(() => configStore.config.preferences);
 
 const activeTab = computed(() => tabStore.activeTab);
-
-const isSessionTab = computed(() => activeTab.value?.filePath.startsWith("session://") ?? false);
 
 const hasExternalChange = computed(
   () =>
@@ -94,16 +91,6 @@ function handleCloseTab() {
 
 <template>
   <div class="editor-pane" v-if="activeTab">
-    <!-- Session tab: show SessionDetail -->
-    <template v-if="isSessionTab">
-      <div class="editor-toolbar">
-        <span class="file-path" :title="activeTab.filePath">{{ activeTab.fileName }}</span>
-      </div>
-      <SessionDetail :tab="activeTab" />
-    </template>
-
-    <!-- File tab: show editor/preview -->
-    <template v-else>
     <div class="editor-toolbar">
       <span class="file-path" :title="activeTab.filePath">{{ activeTab.fileName }}</span>
       <div class="toolbar-right">
@@ -157,6 +144,7 @@ function handleCloseTab() {
         :font-size="prefs.fontSize ?? 14"
         :line-wrapping="prefs.lineWrapping ?? true"
         :line-numbers="prefs.lineNumbers ?? true"
+        :file-path="activeTab.filePath"
         :restore-scroll-top="activeTab.scrollTop"
         :restore-cursor-pos="activeTab.cursorPos"
         @update:model-value="handleContentChange"
@@ -174,7 +162,6 @@ function handleCloseTab() {
         :editor-view="editorView"
       />
     </div>
-    </template>
   </div>
 </template>
 

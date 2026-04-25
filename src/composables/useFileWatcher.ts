@@ -55,7 +55,11 @@ export function useFileWatcher() {
           try {
             const diskContent = await readFileContent(filePath);
             if (diskContent !== tab.content) {
-              tabStore.markTabExternallyChanged(tab.id);
+              if (tab.isDirty) {
+                tabStore.markTabExternallyChanged(tab.id);
+              } else {
+                tabStore.reloadTabFromDisk(tab.id, diskContent);
+              }
             }
           } catch {
             tabStore.markTabExternallyDeleted(tab.id);

@@ -20,3 +20,9 @@ export function extractParentDir(filePath: string): string | null {
   if (parts.length < 2) return null;
   return parts.slice(0, -1).join("/");
 }
+
+export function extractBaseName(filePath: string): string {
+  const fileName = extractFileName(filePath);
+  const dotIndex = fileName.lastIndexOf(".");
+  return dotIndex > 0 ? fileName.slice(0, dotIndex) : fileName;
+}

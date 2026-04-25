@@ -9,24 +9,42 @@ export function useDirectoryTree() {
   async function loadDirectoryChildren(dirPath: string): Promise<DirectoryChild[]> {
     const entries = await readDir(dirPath);
     const children: DirectoryChild[] = [];
+    const normalized = dirPath.replace(/\\/g, "/");
     for (const entry of entries) {
-      if (entry.isFile && entry.name?.endsWith(".md")) {
-        const normalized = dirPath.replace(/\\/g, "/");
-        const filePath = `${normalized}/${entry.name}`;
-        children.push({ name: entry.name, filePath, mtime: null });
+      if (entry.isDirectory) {
+        children.push({
+          name: entry.name,
+          filePath: `${normalized}/${entry.name}`,
+          mtime: null,
+          isDir: true,
+          children: [],
+        });
+      } else if (entry.isFile && (entry.name?.endsWith(".md") || entry.name?.endsWith(".markdown"))) {
+        children.push({
+          name: entry.name ?? "",
+          filePath: `${normalized}/${entry.name}`,
+          mtime: null,
+          isDir: false,
+        });
       }
     }
     await Promise.all(
       children.map(async (child) => {
-        try {
-          const info = await stat(child.filePath);
-          child.mtime = info.mtime?.getTime() ?? null;
-        } catch {
-          child.mtime = null;
+        if (!child.isDir) {
+          try {
+            const info = await stat(child.filePath);
+            child.mtime = info.mtime?.getTime() ?? null;
+          } catch {
+            child.mtime = null;
+          }
         }
       }),
     );
-    children.sort((a, b) => a.name.localeCompare(b.name));
+    children.sort((a, b) => {
+      if (a.isDir && !b.isDir) return -1;
+      if (!a.isDir && b.isDir) return 1;
+      return a.name.localeCompare(b.name);
+    });
     return children;
   }
 

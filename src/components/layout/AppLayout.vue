@@ -59,6 +59,7 @@ function startResize(e: MouseEvent) {
 onMounted(async () => {
   await configStore.init();
   fileStore.loadFromConfig(configStore.config.recentFiles);
+  await fileStore.checkFileStatuses();
   dirStore.loadFromConfig(
     configStore.config.favoriteDirs,
     configStore.config.recentDirs,

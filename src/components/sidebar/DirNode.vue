@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import DirFileNode from "./DirFileNode.vue";
-import type { DirectoryEntry } from "../../types/directory";
+import type { DirectoryEntry, DirectoryChild } from "../../types/directory";
 import { useDirectoryStore } from "../../stores/directoryStore";
 import { useDirectoryTree } from "../../composables/useDirectoryTree";
 
@@ -22,9 +22,15 @@ const sortedChildren = computed(() => {
   const sorted = [...children];
   const mul = dirStore.sortOrder === "asc" ? 1 : -1;
   if (dirStore.sortField === "name") {
-    sorted.sort((a, b) => mul * a.name.localeCompare(b.name));
+    sorted.sort((a, b) => {
+      if (a.isDir && !b.isDir) return -1;
+      if (!a.isDir && b.isDir) return 1;
+      return mul * a.name.localeCompare(b.name);
+    });
   } else {
     sorted.sort((a, b) => {
+      if (a.isDir && !b.isDir) return -1;
+      if (!a.isDir && b.isDir) return 1;
       const ta = a.mtime ?? 0;
       const tb = b.mtime ?? 0;
       return mul * (ta - tb);
@@ -45,6 +51,34 @@ function remove() {
   }
   dirStore.persistState();
 }
+
+async function toggleChildDir(child: DirectoryChild) {
+  if (!child.isDir) return;
+  await expandDirectory(child.filePath);
+}
+
+function getSortedChildren(dirPath: string): DirectoryChild[] {
+  const children = dirStore.getNode(dirPath)?.children ?? [];
+  if (!children.length) return children;
+  const sorted = [...children];
+  const mul = dirStore.sortOrder === "asc" ? 1 : -1;
+  if (dirStore.sortField === "name") {
+    sorted.sort((a, b) => {
+      if (a.isDir && !b.isDir) return -1;
+      if (!a.isDir && b.isDir) return 1;
+      return mul * a.name.localeCompare(b.name);
+    });
+  } else {
+    sorted.sort((a, b) => {
+      if (a.isDir && !b.isDir) return -1;
+      if (!a.isDir && b.isDir) return 1;
+      const ta = a.mtime ?? 0;
+      const tb = b.mtime ?? 0;
+      return mul * (ta - tb);
+    });
+  }
+  return sorted;
+}
 </script>
 
 <template>
@@ -62,12 +96,40 @@ function remove() {
     <div v-if="isExpanded" class="dir-children">
       <div v-if="node?.loading" class="dir-loading">Loading...</div>
       <template v-else>
-        <DirFileNode
-          v-for="child in sortedChildren"
-          :key="child.filePath"
-          :child="child"
-          @open="openFileFromDir"
-        />
+        <template v-for="child in sortedChildren" :key="child.filePath">
+          <div v-if="child.isDir" class="child-dir" @click="toggleChildDir(child)">
+            <span class="chevron" :class="{ expanded: dirStore.getNode(child.filePath)?.expanded }">▶</span>
+            <span class="dir-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M.5 3a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5zM2 5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 2 5zm1 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 3 7zm1 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 4 9zm.5 2a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1h-6z"/></svg></span>
+            <span class="child-dir-name">{{ child.name }}</span>
+          </div>
+          <div v-if="child.isDir && dirStore.getNode(child.filePath)?.expanded" class="child-dir-content">
+            <template v-for="subChild in getSortedChildren(child.filePath)" :key="subChild.filePath">
+              <div v-if="subChild.isDir" class="child-dir" @click="toggleChildDir(subChild)">
+                <span class="chevron" :class="{ expanded: dirStore.getNode(subChild.filePath)?.expanded }">▶</span>
+                <span class="dir-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M.5 3a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5zM2 5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 2 5zm1 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 3 7zm1 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 4 9zm.5 2a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1h-6z"/></svg></span>
+                <span class="child-dir-name">{{ subChild.name }}</span>
+              </div>
+              <div v-if="subChild.isDir && dirStore.getNode(subChild.filePath)?.expanded" class="child-dir-content">
+                <DirFileNode
+                  v-for="deepChild in (dirStore.getNode(subChild.filePath)?.children ?? [])"
+                  :key="deepChild.filePath"
+                  :child="deepChild"
+                  @open="openFileFromDir"
+                />
+              </div>
+              <DirFileNode
+                v-else-if="!subChild.isDir"
+                :child="subChild"
+                @open="openFileFromDir"
+              />
+            </template>
+          </div>
+          <DirFileNode
+            v-else-if="!child.isDir"
+            :child="child"
+            @open="openFileFromDir"
+          />
+        </template>
         <div v-if="!(node?.children?.length)" class="dir-empty">
           No .md files
         </div>
@@ -153,5 +215,31 @@ function remove() {
   padding: 4px 8px 4px 36px;
   font-size: 12px;
   color: #9ca3af;
+}
+
+.child-dir {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 20px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #1f2937;
+  font-weight: 500;
+  transition: background-color 0.15s;
+}
+
+.child-dir:hover {
+  background-color: #e0e0e0;
+}
+
+.child-dir-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.child-dir-content {
+  padding-left: 12px;
 }
 </style>

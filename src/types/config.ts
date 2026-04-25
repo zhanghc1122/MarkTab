@@ -1,7 +1,7 @@
 import type { DirectoryEntry, SortField, SortOrder } from "./directory";
 import type { FileEntry } from "./file";
 
-export type SidebarView = "files" | "quickAccess" | "sessions" | "skills";
+export type SidebarView = "files" | "quickAccess";
 
 export interface AppConfig {
   version: number;

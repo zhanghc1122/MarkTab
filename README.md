@@ -1,59 +1,53 @@
 # MarkTab
 
-A tabbed Markdown editor for Windows, built with Tauri v2 + Vue 3.
+A lightweight, tabbed Markdown editor for Windows. Built with Tauri v2 + Vue 3 + CodeMirror 6.
 
-![MarkTab Screenshot](MarkTab.png)
+![MarkTab Screenshot](docs/screenshot.png)
 
 ## Features
 
-- Tabbed editing — open multiple Markdown files in tabs
-- Live preview — edit and preview with syntax highlighting
-- Table of Contents — auto-generated TOC with scroll-follow
-- Diagram support — Mermaid and draw.io diagrams rendered inline, with click-to-zoom modal
-- Directory tree — favorite and recent folders with unified sort (by name or modification time)
-- Auto save — debounced save on edit, configurable delay
-- File watcher — detects external changes and deletion
-- Claude Code integration — browse sessions and skills from the sidebar
-- Check for updates — auto-check on startup, manual check in About dialog
-- Keyboard shortcuts — Ctrl+O open, Ctrl+W close tab, Ctrl+S save, Ctrl+Tab switch tab
-- Windows file association — double-click .md files to open in MarkTab
+- **Tabbed editing** — Open multiple files in tabs, switch freely
+- **Live preview** — Real-time rendered preview with syntax highlighting (highlight.js)
+- **Table of Contents** — Auto-generated TOC that follows scroll position
+- **Diagram support** — Mermaid and draw.io diagrams rendered inline, click to enlarge
+- **Directory tree** — Browse folders with recursive subdirectory support, sort by name or time
+- **Image paste** — Paste or drag images directly, auto-saved to `.assets` folder with markdown reference inserted
+- **Auto save** — Debounced save with configurable delay
+- **Agent-friendly** — Non-dirty tabs silently reload on external changes; dirty tabs show a conflict banner
+- **File watcher** — Detects external modifications and file deletion
+- **Keyboard shortcuts** — Ctrl+O/W/S/Tab and more
+- **Windows file association** — Double-click `.md` files to open in MarkTab
+- **Check for updates** — Auto-check on startup, manual check in About dialog
 
 ## Download
 
-[Latest Release](https://github.com/zhanghc1122/MarkTab/releases/latest)
+Download the latest installer from the [Releases](../../releases) page.
 
-| File | Description |
-|------|-------------|
-| `marktab.exe` | Standalone executable, no installer needed (~15 MB) |
-| `MarkTab_x64_en-US.msi` | Windows installer (~6 MB) |
+- **MSI installer** — `MarkTab_x.x.x_x64_en-US.mi`
+- **Portable EXE** — `marktab.exe` (~15 MB, standalone, no dependencies)
 
-**Requirements:** Windows 10/11 x64
+## Development
 
-## Install
+```bash
+# Install dependencies
+npm install
 
-### MSI Installer
+# Development
+npx tauri dev
 
-1. Download the latest `.msi` from [Releases](https://github.com/zhanghc1122/MarkTab/releases/latest)
-2. Double-click to install
-3. Launch from Start Menu or desktop shortcut
+# Production build
+npx tauri build
+```
 
-### Portable
+See [CLAUDE.md](CLAUDE.md) for detailed build instructions and architecture docs.
 
-1. Download `marktab.exe` from [Releases](https://github.com/zhanghc1122/MarkTab/releases/latest)
-2. Place anywhere on your system
-3. Double-click to run (no dependencies)
+## Tech Stack
 
-## Usage
-
-- **Open file:** Ctrl+O or click the open button in the sidebar
-- **Close tab:** Ctrl+W or click the X on the tab
-- **Save:** Ctrl+S (auto-save is on by default)
-- **Switch tabs:** Ctrl+Tab / Ctrl+Shift+Tab
-- **Toggle preview:** Click the preview toggle in the tab bar
-- **Add folder to favorites:** Click the folder+ button in the Quick Access toolbar
-- **Sort files:** Use the sort buttons (name A-Z or time newest-first) in the toolbar
-- **Zoom diagram:** Click any Mermaid or draw.io diagram to open in a zoomable modal
-- **Check for updates:** Click About → Check for Updates
+- **Frontend**: Vue 3 + TypeScript + Tailwind CSS v4
+- **Editor**: CodeMirror 6 (direct, not via vue-codemirror)
+- **Preview**: markdown-it + highlight.js
+- **Backend**: Tauri v2 (Rust)
+- **Plugins**: fs, dialog, window-state, single-instance, shell
 
 ## License
 

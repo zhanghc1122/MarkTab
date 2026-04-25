@@ -7,6 +7,7 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirro
 import { syntaxHighlighting, defaultHighlightStyle, bracketMatching } from "@codemirror/language";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
+import { saveImageToAssets } from "../../services/fileIoService";
 
 const props = withDefaults(defineProps<{
   modelValue: string;
@@ -15,6 +16,7 @@ const props = withDefaults(defineProps<{
   lineNumbers?: boolean;
   restoreScrollTop?: number;
   restoreCursorPos?: number;
+  filePath?: string;
 }>(), {
   fontSize: 14,
   lineWrapping: true,
@@ -53,6 +55,59 @@ function createTheme(fontSize: number) {
   });
 }
 
+function createImageHandler(view: EditorView, type: "paste" | "drop", data: DataTransfer) {
+  const files: File[] = [];
+  if (type === "paste") {
+    const items = data.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith("image/")) {
+        const file = items[i].getAsFile();
+        if (file) files.push(file);
+      }
+    }
+  } else {
+    if (data.files) {
+      for (let i = 0; i < data.files.length; i++) {
+        const file = data.files[i];
+        if (file.type.startsWith("image/")) files.push(file);
+      }
+    }
+  }
+  if (files.length === 0) return false;
+  if (!props.filePath) return false;
+
+  const mdFilePath = props.filePath;
+  for (const file of files) {
+    const ext = file.name.split(".").pop() || "png";
+    file.arrayBuffer().then(async (buf) => {
+      const imageData = new Uint8Array(buf);
+      try {
+        const ref = await saveImageToAssets(mdFilePath, imageData, ext);
+        const markdown = `![](${ref})`;
+        const pos = view.state.selection.main.head;
+        view.dispatch({
+          changes: { from: pos, insert: markdown },
+          selection: { anchor: pos + markdown.length },
+        });
+      } catch (e) {
+        console.error("Failed to save image:", e);
+      }
+    });
+  }
+  return true;
+}
+
+function imageDropExtension() {
+  return EditorView.domEventHandlers({
+    paste(event, view) {
+      return createImageHandler(view, "paste", event.clipboardData!);
+    },
+    drop(event, view) {
+      return createImageHandler(view, "drop", event.dataTransfer!);
+    },
+  });
+}
+
 function createState(content: string): EditorState {
   return EditorState.create({
     doc: content,
@@ -75,6 +130,7 @@ function createState(content: string): EditorState {
       wrapCompartment.of(props.lineWrapping ? EditorView.lineWrapping : []),
       themeCompartment.of(createTheme(props.fontSize)),
       placeholder("Start writing markdown..."),
+      imageDropExtension(),
       EditorView.updateListener.of((update) => {
         if (update.docChanged && !ignoreNextUpdate) {
           emit("update:modelValue", update.state.doc.toString());

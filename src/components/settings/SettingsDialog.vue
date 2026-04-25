@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { invoke } from "@tauri-apps/api/core";
 import { useAppConfigStore } from "../../stores/appConfigStore";
 
 const configStore = useAppConfigStore();
@@ -29,10 +28,6 @@ async function handleSave() {
 
 function handleCancel() {
   emit("close");
-}
-
-function handleSetDefault() {
-  invoke("open_default_apps_settings");
 }
 </script>
 
@@ -113,14 +108,7 @@ function handleSetDefault() {
           </div>
         </div>
 
-        <div class="setting-item">
-          <label class="setting-label">Default Markdown Editor</label>
-          <p class="setting-hint">Set MarkTab as the default app for .md files</p>
-          <button class="btn btn-outline" @click="handleSetDefault">
-            Set as Default App
-          </button>
         </div>
-      </div>
 
       <div class="settings-footer">
         <button class="btn btn-cancel" @click="handleCancel">Cancel</button>

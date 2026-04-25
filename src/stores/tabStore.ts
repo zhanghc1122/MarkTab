@@ -126,27 +126,6 @@ export const useTabStore = defineStore("tab", () => {
     }
   }
 
-  function openSessionTab(sessionId: string, firstPrompt: string, _projectPath: string): TabState {
-    const existing = tabs.value.find((t) => t.filePath === `session://${sessionId}`);
-    if (existing) {
-      activeTabId.value = existing.id;
-      return existing;
-    }
-    const tab: TabState = {
-      id: generateId(),
-      filePath: `session://${sessionId}`,
-      fileName: firstPrompt.slice(0, 60) + (firstPrompt.length > 60 ? "..." : ""),
-      content: "",
-      originalContent: "",
-      scrollTop: 0,
-      cursorPos: 0,
-      isDirty: false,
-    };
-    tabs.value.push(tab);
-    activeTabId.value = tab.id;
-    return tab;
-  }
-
   return {
     tabs,
     activeTabId,
@@ -163,6 +142,5 @@ export const useTabStore = defineStore("tab", () => {
     markTabExternallyDeleted,
     clearExternalChangeState,
     reloadTabFromDisk,
-    openSessionTab,
   };
 });

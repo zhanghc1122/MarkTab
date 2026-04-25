@@ -13,8 +13,6 @@ const showAbout = ref(false);
 const tabs: { key: SidebarView; title: string; icon: string }[] = [
   { key: "files", title: "Files", icon: "files" },
   { key: "quickAccess", title: "Quick Access", icon: "folders" },
-  { key: "sessions", title: "Sessions", icon: "sessions" },
-  { key: "skills", title: "Skills", icon: "skills" },
 ];
 </script>
 
@@ -38,15 +36,7 @@ const tabs: { key: SidebarView; title: string; icon: string }[] = [
         <svg v-else-if="tab.icon === 'folders'" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
           <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3H13.5a2 2 0 0 1 2 1.99V13a2 2 0 0 1-2 2H2.5a2 2 0 0 1-2-2V5.01a2 2 0 0 1 .04-.14ZM1 5v8a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 15 13V5a1.5 1.5 0 0 0-1.5-1.5H2.5A1.5 1.5 0 0 0 1 5z"/>
         </svg>
-        <!-- Sessions: lightning -->
-        <svg v-else-if="tab.icon === 'sessions'" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.354L6.694 9H3.5a.5.5 0 0 1-.48-.641l2.5-8z"/>
-        </svg>
-        <!-- Skills: puzzle -->
-        <svg v-else-if="tab.icon === 'skills'" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M6 0a2 2 0 0 0-2 2v2H2a2 2 0 0 0 0 4h2v2a2 2 0 1 0 4 0V8h2a2 2 0 0 0 0-4H8V2a2 2 0 0 0-2-2zm0 1a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2H7v3a1 1 0 1 1-2 0V7H2a1 1 0 1 1 0-2h3V2a1 1 0 0 1 1-1z"/>
-        </svg>
-      </button>
+        </button>
     </div>
     <div class="header-actions">
       <button class="icon-btn" title="Settings" @click="showSettings = true">

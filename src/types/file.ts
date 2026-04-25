@@ -3,4 +3,6 @@ export interface FileEntry {
   filePath: string;
   fileName: string;
   lastOpened: number;
+  fileStatus?: "deleted" | "modified";
+  diskMtime?: Date | null;
 }

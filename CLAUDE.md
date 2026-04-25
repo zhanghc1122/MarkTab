@@ -47,7 +47,7 @@ npx tauri dev   # or: npx tauri build
 ```
 AppConfig (JSON in appDataDir)
   ├── recentFiles → fileStore (Pinia)
-  ├── groups → fileStore (Pinia)
+  ├── favoriteDirs, recentDirs → directoryStore (Pinia)
   └── preferences → appConfigStore (Pinia)
         ├── autoSaveDelay
         ├── sidebarWidth
@@ -59,22 +59,22 @@ AppConfig (JSON in appDataDir)
 Active Tab Content → useAutoSave (debounced) → writeFileContent → disk
 ```
 
-All stores use Pinia Composition API style. `fileStore.persistState()` serializes runtime state back through `appConfigStore` to the JSON config file. Four stores total: `appConfigStore` (preferences & config persistence), `fileStore` (file list & groups), `tabStore` (open tabs, active tab, dirty state), `editorStore` (CodeMirror instance & editor-specific state).
+All stores use Pinia Composition API style. `fileStore.persistState()` serializes runtime state back through `appConfigStore` to the JSON config file. Five stores total: `appConfigStore` (preferences & config persistence), `fileStore` (file list & recent files), `tabStore` (open tabs, active tab, dirty state), `editorStore` (CodeMirror instance & editor-specific state), `directoryStore` (favorite/recent directories & directory tree).
 
 ### Code Structure
 
 ```
 src/
-  components/       editor/ (MarkdownEditor, TabBar, TabItem)
+  components/       editor/ (MarkdownEditor, TabBar, TabItem, EditorPane, FileChangeBanner)
                     layout/ (AppLayout, Sidebar)
                     settings/ (SettingsDialog)
-                    sidebar/ (FileTree, FileTreeItem, SidebarToolbar)
-  composables/      useAutoSave, useExternalFileOpen, useFileDialog, useKeyboardShortcuts
+                    sidebar/ (FileTree, FileTreeItem, SidebarToolbar, QuickAccess, DirNode, DirFileNode)
+  composables/      useAutoSave, useExternalFileOpen, useFileDialog, useFileWatcher, useKeyboardShortcuts, useDirectoryTree
   services/         configService (config file read/write)
                     fileIoService (file open/read/write via Tauri FS plugin)
                     markdownService (markdown-it rendering + highlight.js)
-  stores/           appConfigStore, fileStore, tabStore, editorStore
-  types/            config.ts, file.ts, tab.ts
+  stores/           appConfigStore, fileStore, tabStore, editorStore, directoryStore
+  types/            config.ts, file.ts, tab.ts, directory.ts
   utils/            debounce.ts, pathUtils.ts
 ```
 
@@ -86,13 +86,13 @@ src/
 
 ### Rust Backend
 
-Minimal — `src-tauri/src/lib.rs` registers plugins, handles CLI argument forwarding, and has one custom command `open_default_apps_settings` (opens Windows Default Apps settings). All file I/O uses `tauri-plugin-fs` and `tauri-plugin-dialog` from the frontend.
+Minimal — `src-tauri/src/lib.rs` registers plugins and handles CLI argument forwarding. All file I/O uses `tauri-plugin-fs` and `tauri-plugin-dialog` from the frontend.
 
 `lib.rs` has a `extract_file_path` helper that skips flags (`-` prefixed args) and the program name. On first launch, it sleeps 500ms before emitting `"open-file"` to let the frontend mount. `main.rs` uses `windows_subsystem = "windows"` to suppress the console window in release builds.
 
 ### Key Dependencies
 
-- **Editor:** CodeMirror 6 via `vue-codemirror` + `@codemirror/lang-markdown`
+- **Editor:** CodeMirror 6 (direct, not via vue-codemirror) + `@codemirror/lang-markdown`
 - **Preview:** `markdown-it` + `highlight.js`
 - **Styling:** Tailwind CSS v4 via `@tailwindcss/vite`
 - **Tauri Plugins:** `fs`, `dialog`, `window-state`, `single-instance`
