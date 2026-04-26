@@ -3,6 +3,7 @@ import { computed } from "vue";
 import DirFileNode from "./DirFileNode.vue";
 import type { DirectoryEntry, DirectoryChild } from "../../types/directory";
 import { useDirectoryStore } from "../../stores/directoryStore";
+import { useTabStore } from "../../stores/tabStore";
 import { useDirectoryTree } from "../../composables/useDirectoryTree";
 
 const props = defineProps<{
@@ -11,6 +12,7 @@ const props = defineProps<{
 }>();
 
 const dirStore = useDirectoryStore();
+const tabStore = useTabStore();
 const { expandDirectory, openFileFromDir } = useDirectoryTree();
 
 const node = computed(() => dirStore.getNode(props.entry.dirPath));
@@ -99,12 +101,14 @@ async function toggleChildDir(child: DirectoryChild) {
                   v-for="deepChild in nestedSorted.get(subChild.filePath) ?? []"
                   :key="deepChild.filePath"
                   :child="deepChild"
+                  :active="tabStore.activeTab?.filePath === deepChild.filePath"
                   @open="openFileFromDir"
                 />
               </div>
               <DirFileNode
                 v-else-if="!subChild.isDir"
                 :child="subChild"
+                :active="tabStore.activeTab?.filePath === subChild.filePath"
                 @open="openFileFromDir"
               />
             </template>
@@ -112,6 +116,7 @@ async function toggleChildDir(child: DirectoryChild) {
           <DirFileNode
             v-else-if="!child.isDir"
             :child="child"
+            :active="tabStore.activeTab?.filePath === child.filePath"
             @open="openFileFromDir"
           />
         </template>

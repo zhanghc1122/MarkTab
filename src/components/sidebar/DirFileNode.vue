@@ -3,6 +3,7 @@ import type { DirectoryChild } from "../../types/directory";
 
 defineProps<{
   child: DirectoryChild;
+  active?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -11,7 +12,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="dir-file-node" @click="emit('open', child.filePath)">
+  <div class="dir-file-node" :class="{ active }" @click="emit('open', child.filePath)">
     <span class="file-name">{{ child.name }}</span>
   </div>
 </template>
@@ -30,6 +31,10 @@ const emit = defineEmits<{
 
 .dir-file-node:hover {
   background-color: #f3f4f6;
+}
+
+.dir-file-node.active {
+  background: #d4d4d4;
 }
 
 .file-name {
