@@ -30,7 +30,7 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'MarkTab ${{ github.ref_name }}'
           releaseBody: 'See CHANGELOG.md for details.'
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           args: --target x86_64-pc-windows-msvc
 
@@ -58,7 +58,7 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'MarkTab ${{ github.ref_name }}'
           releaseBody: 'See CHANGELOG.md for details.'
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           args: --target aarch64-apple-darwin,--target x86_64-apple-darwin
 
