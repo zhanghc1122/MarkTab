@@ -111,7 +111,29 @@ Minimal — `src-tauri/src/lib.rs` registers plugins and handles CLI argument fo
 
 ## Release Workflow
 
-When publishing a new version, these steps must all be done:
+### Automated (GitHub Actions)
+
+Push a tag to trigger cross-platform builds:
+
+```bash
+# 1. Update version in package.json, Cargo.toml, Cargo.lock, tauri.conf.json
+
+# 2. Commit and push
+git add -A && git commit -m "release: vx.y.z"
+git push github master
+
+# 3. Create and push tag
+git tag vx.y.z
+git push github vx.y.z
+```
+
+GitHub Actions builds:
+- **Windows**: EXE + MSI (`x86_64-pc-windows-msvc`)
+- **macOS**: app + dmg (Intel + ARM: `x86_64-apple-darwin`, `aarch64-apple-darwin`)
+
+Release is created as draft — manually publish after reviewing.
+
+### Manual (Windows only)
 
 1. **Update version number** in all four locations:
    - `package.json` — `"version": "x.y.z"`
@@ -119,21 +141,9 @@ When publishing a new version, these steps must all be done:
    - `src-tauri/Cargo.lock` — find `name = "marktab"` entry and update its `version`
    - `src-tauri/tauri.conf.json` — `"version": "x.y.z"`
 
-2. **Update README.md** — reflect new features, fix MSI filename pattern (`MarkTab_x.y.z_x64_en-US.msi`)
+2. **Build** — `npx tauri build` (with MSVC env vars)
 
-3. **Build** — `npx tauri build` (with MSVC env vars as described above)
-
-4. **Commit & push** — commit all changes, push to `github` remote, create git tag `vx.y.z`
-
-5. **Create GitHub Release** — use `gh release create vx.y.z` with EXE + MSI assets:
-   ```bash
-   "/c/Program Files/GitHub CLI/gh.exe" release create vx.y.z \
-     "src-tauri/target/release/marktab.exe" \
-     "src-tauri/target/release/bundle/msi/MarkTab_x.y.z_x64_en-US.msi" \
-     --title "vx.y.z" --notes "..."
-   ```
-
-The update checker (`useUpdateChecker`) reads the GitHub Releases API, so a new release must exist on GitHub for users to see update notifications.
+3. **Create GitHub Release** manually with EXE + MSI assets
 
 ## Tauri Config Notes
 
