@@ -16,8 +16,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Rust
-        uses: dtolnay/rust-action@stable
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
 
       - name: Install frontend dependencies
         run: npm install
@@ -32,7 +34,6 @@ jobs:
           releaseBody: 'See CHANGELOG.md for details.'
           releaseDraft: false
           prerelease: false
-          args: --target x86_64-pc-windows-msvc
 
   build-macos:
     runs-on: macos-latest
@@ -44,8 +45,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Rust
-        uses: dtolnay/rust-action@stable
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
 
       - name: Install frontend dependencies
         run: npm install
@@ -60,16 +63,4 @@ jobs:
           releaseBody: 'See CHANGELOG.md for details.'
           releaseDraft: false
           prerelease: false
-          args: --target aarch64-apple-darwin,--target x86_64-apple-darwin
-
-  release:
-    needs: [build-windows, build-macos]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: List artifacts
-        run: ls -R artifacts
+          args: --target aarch64-apple-darwin --target x86_64-apple-darwin
