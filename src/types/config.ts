@@ -2,6 +2,7 @@ import type { DirectoryEntry, SortField, SortOrder } from "./directory";
 import type { FileEntry } from "./file";
 
 export type SidebarView = "files" | "quickAccess";
+export type EditorMode = "edit" | "preview";
 
 export interface AppConfig {
   version: number;
@@ -14,7 +15,7 @@ export interface AppConfig {
     autoSaveDelay: number;
     sidebarWidth: number;
     sidebarView: SidebarView;
-    editorMode: "edit" | "preview";
+    editorMode: EditorMode;
     fontSize: number;
     lineWrapping: boolean;
     lineNumbers: boolean;
@@ -32,7 +33,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     autoSaveDelay: 2000,
     sidebarWidth: 260,
     sidebarView: "files",
-    editorMode: "edit",
+    editorMode: "preview",
     fontSize: 14,
     lineWrapping: true,
     lineNumbers: true,

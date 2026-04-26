@@ -16,8 +16,7 @@ const { expandDirectory, openFileFromDir } = useDirectoryTree();
 const node = computed(() => dirStore.getNode(props.entry.dirPath));
 const isExpanded = computed(() => node.value?.expanded ?? false);
 
-const sortedChildren = computed(() => {
-  const children = node.value?.children ?? [];
+function sortChildren(children: DirectoryChild[]): DirectoryChild[] {
   if (!children.length) return children;
   const sorted = [...children];
   const mul = dirStore.sortOrder === "asc" ? 1 : -1;
@@ -37,6 +36,18 @@ const sortedChildren = computed(() => {
     });
   }
   return sorted;
+}
+
+const sortedChildren = computed(() => sortChildren(node.value?.children ?? []));
+
+const nestedSorted = computed(() => {
+  const map = new Map<string, DirectoryChild[]>();
+  for (const child of sortedChildren.value) {
+    if (child.isDir) {
+      map.set(child.filePath, sortChildren(dirStore.getNode(child.filePath)?.children ?? []));
+    }
+  }
+  return map;
 });
 
 function toggle() {
@@ -56,36 +67,12 @@ async function toggleChildDir(child: DirectoryChild) {
   if (!child.isDir) return;
   await expandDirectory(child.filePath);
 }
-
-function getSortedChildren(dirPath: string): DirectoryChild[] {
-  const children = dirStore.getNode(dirPath)?.children ?? [];
-  if (!children.length) return children;
-  const sorted = [...children];
-  const mul = dirStore.sortOrder === "asc" ? 1 : -1;
-  if (dirStore.sortField === "name") {
-    sorted.sort((a, b) => {
-      if (a.isDir && !b.isDir) return -1;
-      if (!a.isDir && b.isDir) return 1;
-      return mul * a.name.localeCompare(b.name);
-    });
-  } else {
-    sorted.sort((a, b) => {
-      if (a.isDir && !b.isDir) return -1;
-      if (!a.isDir && b.isDir) return 1;
-      const ta = a.mtime ?? 0;
-      const tb = b.mtime ?? 0;
-      return mul * (ta - tb);
-    });
-  }
-  return sorted;
-}
 </script>
 
 <template>
   <div class="dir-node">
     <div class="dir-header" @click="toggle">
       <span class="chevron" :class="{ expanded: isExpanded }">▶</span>
-      <span class="dir-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M.5 3a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5zM2 5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 2 5zm1 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 3 7zm1 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 4 9zm.5 2a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1h-6z"/></svg></span>
       <span class="dir-name" :title="entry.dirPath">{{ entry.dirName }}</span>
       <button class="remove-btn" @click.stop="remove" title="Remove">
         <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
@@ -99,19 +86,17 @@ function getSortedChildren(dirPath: string): DirectoryChild[] {
         <template v-for="child in sortedChildren" :key="child.filePath">
           <div v-if="child.isDir" class="child-dir" @click="toggleChildDir(child)">
             <span class="chevron" :class="{ expanded: dirStore.getNode(child.filePath)?.expanded }">▶</span>
-            <span class="dir-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M.5 3a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5zM2 5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 2 5zm1 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 3 7zm1 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 4 9zm.5 2a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1h-6z"/></svg></span>
             <span class="child-dir-name">{{ child.name }}</span>
           </div>
           <div v-if="child.isDir && dirStore.getNode(child.filePath)?.expanded" class="child-dir-content">
-            <template v-for="subChild in getSortedChildren(child.filePath)" :key="subChild.filePath">
+            <template v-for="subChild in nestedSorted.get(child.filePath) ?? []" :key="subChild.filePath">
               <div v-if="subChild.isDir" class="child-dir" @click="toggleChildDir(subChild)">
                 <span class="chevron" :class="{ expanded: dirStore.getNode(subChild.filePath)?.expanded }">▶</span>
-                <span class="dir-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M.5 3a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5zM2 5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 2 5zm1 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 3 7zm1 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 4 9zm.5 2a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1h-6z"/></svg></span>
                 <span class="child-dir-name">{{ subChild.name }}</span>
               </div>
               <div v-if="subChild.isDir && dirStore.getNode(subChild.filePath)?.expanded" class="child-dir-content">
                 <DirFileNode
-                  v-for="deepChild in (dirStore.getNode(subChild.filePath)?.children ?? [])"
+                  v-for="deepChild in nestedSorted.get(subChild.filePath) ?? []"
                   :key="deepChild.filePath"
                   :child="deepChild"
                   @open="openFileFromDir"
@@ -171,11 +156,6 @@ function getSortedChildren(dirPath: string): DirectoryChild[] {
   transform: rotate(90deg);
 }
 
-.dir-icon {
-  flex-shrink: 0;
-  color: #6b7280;
-}
-
 .dir-name {
   flex: 1;
   overflow: hidden;
@@ -212,7 +192,7 @@ function getSortedChildren(dirPath: string): DirectoryChild[] {
 
 .dir-loading,
 .dir-empty {
-  padding: 4px 8px 4px 36px;
+  padding: 4px 8px 4px 24px;
   font-size: 12px;
   color: #9ca3af;
 }

@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import type { AppConfig, SidebarView } from "../types/config";
+import type { AppConfig, SidebarView, EditorMode } from "../types/config";
 import { DEFAULT_CONFIG } from "../types/config";
 import { loadConfig, saveConfig } from "../services/configService";
 
@@ -18,7 +18,7 @@ export const useAppConfigStore = defineStore("appConfig", () => {
     await saveConfig(config.value);
   }
 
-  function setEditorMode(mode: "edit" | "preview") {
+  function setEditorMode(mode: EditorMode) {
     config.value.preferences.editorMode = mode;
   }
 

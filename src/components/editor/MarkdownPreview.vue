@@ -6,6 +6,7 @@ import { open } from "@tauri-apps/plugin-shell";
 const props = defineProps<{
   source: string;
   filePath?: string;
+  fontSize?: number;
 }>();
 
 const previewRef = ref<HTMLElement>();
@@ -104,7 +105,7 @@ defineExpose({
 
 <template>
   <div class="markdown-preview-wrapper">
-    <div class="markdown-preview" ref="previewRef" v-html="renderedHtml" @click="handleClick"></div>
+    <div class="markdown-preview" ref="previewRef" v-html="renderedHtml" @click="handleClick" :style="{ fontSize: (props.fontSize ?? 14) + 'px' }"></div>
   </div>
   <Teleport to="body">
     <div v-if="showDiagramModal" class="diagram-modal-overlay" @click="closeDiagramModal">

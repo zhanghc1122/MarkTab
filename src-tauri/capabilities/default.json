@@ -38,8 +38,14 @@
       "allow": [{ "path": "$APPDATA/**" }, { "path": "**" }]
     },
     "window-state:default",
-    "fs:allow-watch",
-    "fs:allow-unwatch",
+    {
+      "identifier": "fs:allow-watch",
+      "allow": [{ "path": "$APPDATA/**" }, { "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-unwatch",
+      "allow": [{ "path": "$APPDATA/**" }, { "path": "**" }]
+    },
     "shell:allow-open"
   ]
 }

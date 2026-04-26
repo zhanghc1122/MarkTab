@@ -69,7 +69,7 @@ function handleCancel() {
         </div>
 
         <div class="setting-item">
-          <label class="setting-label">Editor Font Size</label>
+          <label class="setting-label">Font Size</label>
           <div class="setting-control">
             <input
               type="range"

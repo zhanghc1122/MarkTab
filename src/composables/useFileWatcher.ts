@@ -1,40 +1,92 @@
 import { watch, onBeforeUnmount } from "vue";
 import { watch as fsWatch } from "@tauri-apps/plugin-fs";
+import type { WatchEvent } from "@tauri-apps/plugin-fs";
 import { useTabStore } from "../stores/tabStore";
 import {
   selfWriteTimestamps,
   readFileContent,
   fileExists,
 } from "../services/fileIoService";
+import { extractParentDir } from "../utils/pathUtils";
 
 const SUPPRESSION_WINDOW_MS = 1000;
 
-const activeWatchers = new Map<string, () => void>();
+const dirWatchers = new Map<string, () => void>();
+const watchedFilesByDir = new Map<string, Set<string>>();
+
+function normalizePath(p: string): string {
+  return p.replace(/\\/g, "/").toLowerCase();
+}
 
 export function useFileWatcher() {
   const tabStore = useTabStore();
 
-  function startWatching(filePath: string) {
-    if (activeWatchers.has(filePath)) return;
+  function addFileToWatch(filePath: string) {
+    const dirPath = extractParentDir(filePath);
+    if (!dirPath) return;
+
+    let filesSet = watchedFilesByDir.get(dirPath);
+    if (!filesSet) {
+      filesSet = new Set();
+      watchedFilesByDir.set(dirPath, filesSet);
+    }
+
+    if (!filesSet.has(filePath)) {
+      filesSet.add(filePath);
+      startDirWatch(dirPath);
+    }
+  }
+
+  function removeFileFromWatch(filePath: string) {
+    const dirPath = extractParentDir(filePath);
+    if (!dirPath) return;
+
+    const filesSet = watchedFilesByDir.get(dirPath);
+    if (filesSet) {
+      filesSet.delete(filePath);
+      if (filesSet.size === 0) {
+        stopDirWatch(dirPath);
+      }
+    }
+  }
+
+  function startDirWatch(dirPath: string) {
+    if (dirWatchers.has(dirPath)) return;
 
     const stopPromise = fsWatch(
-      filePath,
-      () => {
-        handleFileChange(filePath);
+      dirPath,
+      (event: WatchEvent) => {
+        handleDirEvent(dirPath, event);
       },
       { delayMs: 500 }
     );
 
-    activeWatchers.set(filePath, () => {
+    dirWatchers.set(dirPath, () => {
       stopPromise.then((unwatch) => unwatch());
     });
   }
 
-  function stopWatching(filePath: string) {
-    const stopFn = activeWatchers.get(filePath);
+  function stopDirWatch(dirPath: string) {
+    const stopFn = dirWatchers.get(dirPath);
     if (stopFn) {
       stopFn();
-      activeWatchers.delete(filePath);
+      dirWatchers.delete(dirPath);
+      watchedFilesByDir.delete(dirPath);
+    }
+  }
+
+  function handleDirEvent(dirPath: string, event: WatchEvent) {
+    const filesInDir = watchedFilesByDir.get(dirPath);
+    if (!filesInDir) return;
+
+    for (const eventPath of event.paths) {
+      const normalizedEventPath = normalizePath(eventPath);
+      for (const watchedFile of filesInDir) {
+        if (normalizedEventPath === normalizePath(watchedFile)) {
+          handleFileChange(watchedFile);
+          break;
+        }
+      }
     }
   }
 
@@ -51,15 +103,10 @@ export function useFileWatcher() {
         if (!existsOnDisk) {
           tabStore.markTabExternallyDeleted(tab.id);
         } else {
-          // Only mark as externally changed if the content actually differs
           try {
             const diskContent = await readFileContent(filePath);
             if (diskContent !== tab.content) {
-              if (tab.isDirty) {
-                tabStore.markTabExternallyChanged(tab.id);
-              } else {
-                tabStore.reloadTabFromDisk(tab.id, diskContent);
-              }
+              tabStore.markTabExternallyChanged(tab.id);
             }
           } catch {
             tabStore.markTabExternallyDeleted(tab.id);
@@ -77,13 +124,13 @@ export function useFileWatcher() {
 
       for (const path of currentSet) {
         if (!oldSet.has(path)) {
-          startWatching(path);
+          addFileToWatch(path);
         }
       }
 
       for (const path of oldSet) {
         if (!currentSet.has(path)) {
-          stopWatching(path);
+          removeFileFromWatch(path);
         }
       }
     },
@@ -91,9 +138,10 @@ export function useFileWatcher() {
   );
 
   onBeforeUnmount(() => {
-    for (const [, stopFn] of activeWatchers) {
+    for (const [, stopFn] of dirWatchers) {
       stopFn();
     }
-    activeWatchers.clear();
+    dirWatchers.clear();
+    watchedFilesByDir.clear();
   });
 }

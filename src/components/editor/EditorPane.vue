@@ -154,6 +154,7 @@ function handleCloseTab() {
         ref="previewComponentRef"
         :source="activeTab.content"
         :file-path="activeTab.filePath"
+        :font-size="prefs.fontSize ?? 14"
       />
       <TableOfContents
         :headings="headings"

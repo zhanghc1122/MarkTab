@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import type { EditorMode } from "../types/config";
 
 export const useEditorStore = defineStore("editor", () => {
   const isPreviewMode = ref(false);
@@ -9,7 +10,7 @@ export const useEditorStore = defineStore("editor", () => {
     isPreviewMode.value = !isPreviewMode.value;
   }
 
-  function setMode(mode: "edit" | "preview") {
+  function setMode(mode: EditorMode) {
     isPreviewMode.value = mode === "preview";
   }
 

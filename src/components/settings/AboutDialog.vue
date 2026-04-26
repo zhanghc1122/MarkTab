@@ -6,6 +6,12 @@ import UpdateDialog from "./UpdateDialog.vue";
 
 const GITHUB_REPO = "zhanghc1122/MarkTab";
 
+const features = [
+  { color: '#f59e0b', label: 'Native Performance — Tauri + Vue 3' },
+  { color: '#3b82f6', label: 'Multi-tab Editing — Manage multiple files efficiently' },
+  { color: '#10b981', label: 'Live Preview — What you see is what you get' },
+]
+
 const emit = defineEmits<{
   close: [];
 }>();
@@ -32,7 +38,7 @@ async function handleCheckUpdate() {
 
       <div class="about-body">
         <div class="app-info">
-          <div class="app-icon">📝</div>
+          <div class="app-icon">M</div>
           <h3>MarkTab</h3>
           <p class="version">Version {{ appVersion }}</p>
           <p class="desc">A clean and efficient Markdown editor, built with Tauri for native performance and smooth experience.</p>
@@ -42,17 +48,9 @@ async function handleCheckUpdate() {
         </div>
 
         <div class="features">
-          <div class="feature-item">
-            <span class="feature-icon">⚡</span>
-            <span>Native Performance — Tauri + Vue 3</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">📑</span>
-            <span>Multi-tab Editing — Manage multiple files efficiently</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">🎨</span>
-            <span>Live Preview — What you see is what you get</span>
+          <div v-for="f in features" :key="f.color" class="feature-item">
+            <span class="feature-dot" :style="{ background: f.color }"></span>
+            <span>{{ f.label }}</span>
           </div>
         </div>
       </div>
@@ -132,8 +130,17 @@ async function handleCheckUpdate() {
 }
 
 .app-icon {
-  font-size: 48px;
-  margin-bottom: 8px;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 8px;
+  border-radius: 14px;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .app-info h3 {
@@ -184,8 +191,11 @@ async function handleCheckUpdate() {
   padding: 4px 0;
 }
 
-.feature-icon {
-  font-size: 14px;
+.feature-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .about-footer {
