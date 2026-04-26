@@ -37,6 +37,10 @@ const emit = defineEmits<{
   background: #d4d4d4;
 }
 
+.dir-file-node.active:hover {
+  background: #c8c8c8;
+}
+
 .file-name {
   overflow: hidden;
   text-overflow: ellipsis;
