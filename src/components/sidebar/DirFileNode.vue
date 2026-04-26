@@ -30,7 +30,7 @@ const emit = defineEmits<{
 }
 
 .dir-file-node:hover {
-  background-color: #f3f4f6;
+  background-color: #e0e0e0;
 }
 
 .dir-file-node.active {
