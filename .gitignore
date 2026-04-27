@@ -24,8 +24,9 @@ dist-ssr/
 src-tauri/target/
 src-tauri/gen/
 
-# Claude Code local files
+# Claude Code files
 .claude/
+CLAUDE.md
 
 # Local dev scripts
 run-dev.cmd
