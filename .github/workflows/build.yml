@@ -39,7 +39,7 @@ jobs:
           prerelease: false
 
   build-macos-intel:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
 
@@ -69,7 +69,7 @@ jobs:
           args: --target x86_64-apple-darwin
 
   build-macos-arm:
-    runs-on: macos-latest
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
 
@@ -96,4 +96,4 @@ jobs:
           releaseBody: 'See CHANGELOG.md for details.'
           releaseDraft: false
           prerelease: false
-          args: --target aarch64-apple-darwin
+          args: --target aarch64-apple-darwin --bundles app
