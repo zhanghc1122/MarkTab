@@ -1,2 +1,3 @@
 [target.x86_64-pc-windows-msvc]
-linker = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe"
+# Linker is auto-detected by rustc/cc-rs on Windows
+# No hardcoded path needed - works for both local dev and GitHub Actions
