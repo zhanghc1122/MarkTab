@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import Sidebar from "./Sidebar.vue";
 import MainPanel from "./MainPanel.vue";
 import { useAppConfigStore } from "../../stores/appConfigStore";
@@ -13,6 +13,9 @@ import { useExternalFileOpen } from "../../composables/useExternalFileOpen";
 import { useFileWatcher } from "../../composables/useFileWatcher";
 import { useUpdateChecker } from "../../composables/useUpdateChecker";
 import UpdateDialog from "../settings/UpdateDialog.vue";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 
 const configStore = useAppConfigStore();
 const fileStore = useFileStore();
@@ -22,15 +25,60 @@ const dirStore = useDirectoryStore();
 
 const activeTab = computed(() => tabStore.activeTab);
 
-useAutoSave(activeTab);
+const { flushAutoSave } = useAutoSave(activeTab);
 useKeyboardShortcuts();
 useExternalFileOpen();
 useFileWatcher();
 
 const isResizing = ref(false);
 const showUpdateDialog = ref(false);
+let unlistenCloseRequested: UnlistenFn | null = null;
+let unlistenExitRequested: UnlistenFn | null = null;
 
 const { updateInfo, checkForUpdate, openReleasePage } = useUpdateChecker();
+
+function getCloseConfirmMessage() {
+  const hasUnsavedChanges = tabStore.tabs.some((tab) => tab.isDirty);
+  return hasUnsavedChanges
+    ? "Save changes and exit MarkTab?"
+    : "Exit MarkTab?";
+}
+
+function reportSaveFailures(failedFiles: string[]) {
+  if (failedFiles.length === 0) return;
+  const list = failedFiles.map((name) => `  • ${name}`).join("\n");
+  window.alert(
+    `MarkTab could not save the following file(s):\n\n${list}\n\nTheir in-memory changes will be lost.`
+  );
+}
+
+async function shutdownFlow(): Promise<void> {
+  try {
+    const failedFiles = await flushAutoSave();
+    reportSaveFailures(failedFiles);
+    await fileStore.persistState();
+    await configStore.persist();
+  } catch (err) {
+    console.error("Error during shutdown persistence:", err);
+  }
+}
+
+async function setupCloseConfirmation() {
+  const appWindow = getCurrentWindow();
+
+  unlistenCloseRequested = await appWindow.onCloseRequested(async (event) => {
+    event.preventDefault();
+    if (!window.confirm(getCloseConfirmMessage())) return;
+    await shutdownFlow();
+    await appWindow.destroy();
+  });
+
+  unlistenExitRequested = await listen("app-exit-requested", async () => {
+    if (!window.confirm(getCloseConfirmMessage())) return;
+    await shutdownFlow();
+    await invoke("exit_app");
+  });
+}
 
 function startResize(e: MouseEvent) {
   e.preventDefault();
@@ -57,6 +105,7 @@ function startResize(e: MouseEvent) {
 }
 
 onMounted(async () => {
+  await setupCloseConfirmation();
   await configStore.init();
   fileStore.loadFromConfig(configStore.config.recentFiles);
   await fileStore.checkFileStatuses();
@@ -73,6 +122,11 @@ onMounted(async () => {
   if (result?.hasUpdate) {
     showUpdateDialog.value = true;
   }
+});
+
+onBeforeUnmount(() => {
+  unlistenCloseRequested?.();
+  unlistenExitRequested?.();
 });
 </script>
 

@@ -31,7 +31,7 @@ export async function openFileDialog(): Promise<string | null> {
     ],
   });
   if (selected === null) return null;
-  return typeof selected === "string" ? selected : selected;
+  return selected as string;
 }
 
 export async function saveFileDialog(
@@ -51,7 +51,7 @@ export async function saveFileDialog(
 export async function openDirectoryDialog(): Promise<string | null> {
   const selected = await open({ directory: true, multiple: false });
   if (selected === null) return null;
-  return typeof selected === "string" ? selected : selected;
+  return selected as string;
 }
 
 export async function readDirectory(dirPath: string) {

@@ -1,18 +1,8 @@
 <script setup lang="ts">
-import { openFileDialog, readFileContent } from "../../services/fileIoService";
-import { useFileStore } from "../../stores/fileStore";
-import { useTabStore } from "../../stores/tabStore";
-
-const fileStore = useFileStore();
-const tabStore = useTabStore();
+import { openFileFromDialog } from "../../composables/useFileDialog";
 
 async function handleOpen() {
-  const path = await openFileDialog();
-  if (!path) return;
-  const content = await readFileContent(path);
-  const entry = fileStore.addFile(path);
-  tabStore.openTab(entry, content);
-  fileStore.persistState();
+  await openFileFromDialog();
 }
 </script>
 

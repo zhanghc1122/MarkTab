@@ -9,4 +9,6 @@ export interface TabState {
   isDirty: boolean;
   externallyChanged?: boolean;
   externallyDeleted?: boolean;
+  externalContent?: string;
+  externalModifiedAt?: number;
 }

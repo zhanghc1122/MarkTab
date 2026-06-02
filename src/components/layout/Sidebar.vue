@@ -43,7 +43,7 @@ async function handleAddFolder() {
     />
     <div class="sidebar-content">
       <FileTree v-if="sidebarView === 'files'" :sort-field="fileSortField" :sort-order="fileSortOrder" />
-      <QuickAccess v-else-if="sidebarView === 'quickAccess'" />
+      <QuickAccess v-else-if="sidebarView === 'quickAccess'" @add-folder="handleAddFolder" />
     </div>
   </aside>
 </template>

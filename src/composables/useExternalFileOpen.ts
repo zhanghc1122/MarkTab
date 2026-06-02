@@ -1,4 +1,5 @@
-import { listen } from "@tauri-apps/api/event";
+import { onBeforeUnmount } from "vue";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { readFileContent } from "../services/fileIoService";
 import { useFileStore } from "../stores/fileStore";
 import { useTabStore } from "../stores/tabStore";
@@ -18,10 +19,17 @@ export function useExternalFileOpen() {
     }
   }
 
-  listen<string>("open-file", (event) => {
+  let unlisten: UnlistenFn | null = null;
+  void listen<string>("open-file", (event) => {
     const path = event.payload;
     if (path) {
       openFileFromPath(path);
     }
+  }).then((fn) => {
+    unlisten = fn;
+  });
+
+  onBeforeUnmount(() => {
+    unlisten?.();
   });
 }

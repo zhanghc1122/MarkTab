@@ -38,6 +38,8 @@
       "allow": [{ "path": "$APPDATA/**" }, { "path": "**" }]
     },
     "window-state:default",
+    "core:window:allow-set-closable",
+    "core:window:allow-destroy",
     {
       "identifier": "fs:allow-watch",
       "allow": [{ "path": "$APPDATA/**" }, { "path": "**" }]

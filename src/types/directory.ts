@@ -1,6 +1,12 @@
 export type SortField = "name" | "time";
 export type SortOrder = "asc" | "desc";
 
+export interface SortFieldDef {
+  key: string;
+  title: string;
+  defaultOrder: SortOrder;
+}
+
 export interface DirectoryEntry {
   dirPath: string;
   dirName: string;
@@ -21,4 +27,6 @@ export interface DirectoryNode {
   expanded: boolean;
   children: DirectoryChild[];
   loading: boolean;
+  /** "broken" = path no longer exists; "unreadable" = exists but readDir failed. */
+  error?: "broken" | "unreadable";
 }

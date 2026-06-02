@@ -53,6 +53,9 @@ const nestedSorted = computed(() => {
 });
 
 function toggle() {
+  if (props.isFavorite) {
+    dirStore.touchFavorite(props.entry.dirPath);
+  }
   expandDirectory(props.entry.dirPath);
 }
 
@@ -65,6 +68,10 @@ function remove() {
   dirStore.persistState();
 }
 
+function retry() {
+  expandDirectory(props.entry.dirPath);
+}
+
 async function toggleChildDir(child: DirectoryChild) {
   if (!child.isDir) return;
   await expandDirectory(child.filePath);
@@ -73,17 +80,46 @@ async function toggleChildDir(child: DirectoryChild) {
 
 <template>
   <div class="dir-node">
-    <div class="dir-header" @click="toggle">
-      <span class="chevron" :class="{ expanded: isExpanded }">▶</span>
+    <div
+      class="dir-header"
+      :class="{ 'has-error': node?.error }"
+      tabindex="0"
+      role="button"
+      :aria-expanded="isExpanded"
+      :aria-label="`${entry.dirName}, ${isExpanded ? 'expanded' : 'collapsed'}`"
+      @click="toggle"
+      @keydown.enter.prevent="toggle"
+      @keydown.space.prevent="toggle"
+    >
+      <span class="chevron" :class="{ expanded: isExpanded }" aria-hidden="true">▶</span>
+      <span v-if="node?.error" class="error-icon" aria-hidden="true">⚠</span>
       <span class="dir-name" :title="entry.dirPath">{{ entry.dirName }}</span>
-      <button class="remove-btn" @click.stop="remove" title="Remove">
-        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+      <button
+        class="remove-btn"
+        @click.stop="remove"
+        :aria-label="isFavorite ? 'Remove from favorites' : 'Remove from recent'"
+        :title="isFavorite ? 'Remove from favorites' : 'Remove from recent'"
+      >
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
           <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
         </svg>
       </button>
     </div>
     <div v-if="isExpanded" class="dir-children">
       <div v-if="node?.loading" class="dir-loading">Loading...</div>
+      <div v-else-if="node?.error" class="dir-error">
+        <div class="dir-error-text">
+          {{ node.error === "broken" ? "Folder missing" : "Unable to read folder" }}
+        </div>
+        <div class="dir-error-actions">
+          <button
+            v-if="node.error === 'unreadable'"
+            class="dir-error-btn"
+            @click="retry"
+          >Retry</button>
+          <button class="dir-error-btn" @click="remove">Remove</button>
+        </div>
+      </div>
       <template v-else>
         <template v-for="child in sortedChildren" :key="child.filePath">
           <div v-if="child.isDir" class="child-dir" @click="toggleChildDir(child)">
@@ -146,8 +182,18 @@ async function toggleChildDir(child: DirectoryChild) {
   transition: background-color 0.15s;
 }
 
-.dir-header:hover {
+.dir-header:hover,
+.dir-header:focus-visible {
   background-color: #e0e0e0;
+  outline: none;
+}
+
+.dir-header.has-error {
+  color: #b45309;
+}
+
+.dir-header:focus-visible {
+  box-shadow: inset 0 0 0 1px #7c3aed;
 }
 
 .chevron {
@@ -169,7 +215,7 @@ async function toggleChildDir(child: DirectoryChild) {
 }
 
 .remove-btn {
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 18px;
@@ -180,15 +226,62 @@ async function toggleChildDir(child: DirectoryChild) {
   color: #9ca3af;
   cursor: pointer;
   flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s, background-color 0.15s, color 0.15s;
 }
 
-.dir-header:hover .remove-btn {
-  display: flex;
+.dir-header:hover .remove-btn,
+.dir-header:focus-within .remove-btn,
+.remove-btn:focus-visible {
+  opacity: 1;
 }
 
 .remove-btn:hover {
   background: #d4d4d4;
   color: #ef4444;
+}
+
+.remove-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px #7c3aed;
+}
+
+.error-icon {
+  font-size: 12px;
+  color: #b45309;
+  flex-shrink: 0;
+}
+
+.dir-error {
+  padding: 6px 8px 6px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #b45309;
+}
+
+.dir-error-text {
+  font-style: italic;
+}
+
+.dir-error-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.dir-error-btn {
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  color: #92400e;
+  border-radius: 3px;
+  padding: 1px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.dir-error-btn:hover {
+  background: #fef3c7;
 }
 
 .dir-children {

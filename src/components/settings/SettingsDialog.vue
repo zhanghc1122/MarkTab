@@ -257,24 +257,4 @@ function handleCancel() {
   background: #2563eb;
 }
 
-.btn-outline {
-  padding: 6px 16px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  background: #fff;
-  color: #3b82f6;
-  border: 1px solid #3b82f6;
-}
-
-.btn-outline:hover {
-  background: #eff6ff;
-}
-
-.setting-hint {
-  margin: 0 0 8px;
-  font-size: 12px;
-  color: #9ca3af;
-}
 </style>

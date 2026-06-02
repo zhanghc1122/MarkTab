@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { SidebarView } from "../../types/config";
-import type { SortField, SortOrder } from "../../types/directory";
-import SortBar, { type SortFieldDef } from "./SortBar.vue";
+import type { SortField, SortOrder, SortFieldDef } from "../../types/directory";
+import SortBar from "./SortBar.vue";
 import { useDirectoryStore } from "../../stores/directoryStore";
 
 defineProps<{
@@ -116,31 +116,6 @@ const fileSortFields: SortFieldDef[] = [
   flex: 1;
   display: flex;
   justify-content: flex-end;
-}
-
-.toolbar-search {
-  flex: 1;
-  min-width: 0;
-}
-
-.search-input {
-  width: 100%;
-  padding: 3px 6px;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  font-size: 12px;
-  outline: none;
-  background: #fff;
-  color: #374151;
-  box-sizing: border-box;
-}
-
-.search-input:focus {
-  border-color: #7c3aed;
-}
-
-.search-input::placeholder {
-  color: #9ca3af;
 }
 
 .icon-btn {

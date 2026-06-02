@@ -7,16 +7,12 @@ import {
   readFileContent,
   fileExists,
 } from "../services/fileIoService";
-import { extractParentDir } from "../utils/pathUtils";
+import { extractParentDir, normalizePathForComparison } from "../utils/pathUtils";
 
 const SUPPRESSION_WINDOW_MS = 1000;
 
 const dirWatchers = new Map<string, () => void>();
 const watchedFilesByDir = new Map<string, Set<string>>();
-
-function normalizePath(p: string): string {
-  return p.replace(/\\/g, "/").toLowerCase();
-}
 
 export function useFileWatcher() {
   const tabStore = useTabStore();
@@ -80,9 +76,9 @@ export function useFileWatcher() {
     if (!filesInDir) return;
 
     for (const eventPath of event.paths) {
-      const normalizedEventPath = normalizePath(eventPath);
+      const normalizedEventPath = normalizePathForComparison(eventPath);
       for (const watchedFile of filesInDir) {
-        if (normalizedEventPath === normalizePath(watchedFile)) {
+        if (normalizedEventPath === normalizePathForComparison(watchedFile)) {
           handleFileChange(watchedFile);
           break;
         }
@@ -106,7 +102,7 @@ export function useFileWatcher() {
           try {
             const diskContent = await readFileContent(filePath);
             if (diskContent !== tab.content) {
-              tabStore.markTabExternallyChanged(tab.id);
+              tabStore.setTabExternalContent(tab.id, diskContent);
             }
           } catch {
             tabStore.markTabExternallyDeleted(tab.id);

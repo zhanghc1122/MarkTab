@@ -7,6 +7,32 @@ import { useAppConfigStore } from "../stores/appConfigStore";
 export function useAutoSave(activeTab: Ref<TabState | null>) {
   let timer: ReturnType<typeof setTimeout> | null = null;
 
+  async function saveTab(tab: TabState): Promise<string | null> {
+    if (!tab.isDirty) return null;
+    if (tab.externallyChanged || tab.externallyDeleted) return null;
+    try {
+      await writeFileContent(tab.filePath, tab.content);
+      useTabStore().markTabSaved(tab.id);
+      return null;
+    } catch (e) {
+      console.error("Auto-save failed:", e);
+      return tab.fileName;
+    }
+  }
+
+  async function flushAutoSave(): Promise<string[]> {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    const failed: string[] = [];
+    for (const tab of useTabStore().tabs.slice()) {
+      const result = await saveTab(tab);
+      if (result) failed.push(result);
+    }
+    return failed;
+  }
+
   watch(
     () => activeTab.value?.content,
     () => {
@@ -15,22 +41,13 @@ export function useAutoSave(activeTab: Ref<TabState | null>) {
 
       if (timer) clearTimeout(timer);
 
-      const configStore = useAppConfigStore();
-      const delay = configStore.config.preferences.autoSaveDelay || 2000;
+      const delay = useAppConfigStore().config.preferences.autoSaveDelay || 2000;
 
-      timer = setTimeout(async () => {
-        if (!activeTab.value?.isDirty) return;
-        if (activeTab.value?.externallyChanged || activeTab.value?.externallyDeleted) return;
-        try {
-          await writeFileContent(activeTab.value.filePath, activeTab.value.content);
-          const tabStore = useTabStore();
-          if (activeTab.value.id) {
-            tabStore.markTabSaved(activeTab.value.id);
-          }
-        } catch (e) {
-          console.error("Auto-save failed:", e);
-        }
+      timer = setTimeout(() => {
+        void saveTab(tab);
       }, delay);
     }
   );
+
+  return { flushAutoSave, saveTab };
 }

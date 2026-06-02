@@ -246,3 +246,137 @@ html, body, #app {
   .diagram-modal-close { color: #959da5; }
   .diagram-modal-close:hover { background: #2d333b; color: #d1d5da; }
 }
+
+.markdown-print-root {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  width: 800px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body.is-printing-document::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(17, 24, 39, 0.32);
+  backdrop-filter: blur(2px);
+  pointer-events: all;
+}
+
+body.is-printing-document::after {
+  content: "Preparing print...";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  padding: 10px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+@page {
+  size: A4;
+  margin: 16mm;
+}
+
+@media print {
+  html,
+  body {
+    height: auto;
+    overflow: visible;
+    background: #ffffff;
+  }
+
+  #app {
+    display: none !important;
+  }
+
+  body.is-printing-document::before,
+  body.is-printing-document::after {
+    display: none !important;
+  }
+
+  .markdown-print-root {
+    display: block !important;
+    position: static;
+    width: auto;
+    visibility: visible;
+    pointer-events: auto;
+    color: #000000;
+    background: #ffffff;
+  }
+
+  .markdown-print-root .markdown-preview {
+    max-width: none;
+    margin: 0;
+    color: #000000;
+    line-height: 1.65;
+  }
+
+  .markdown-print-root .markdown-preview h1,
+  .markdown-print-root .markdown-preview h2,
+  .markdown-print-root .markdown-preview h3,
+  .markdown-print-root .markdown-preview h4,
+  .markdown-print-root .markdown-preview h5,
+  .markdown-print-root .markdown-preview h6 {
+    break-after: avoid;
+    page-break-after: avoid;
+    color: #000000;
+  }
+
+  .markdown-print-root .markdown-preview p,
+  .markdown-print-root .markdown-preview blockquote,
+  .markdown-print-root .markdown-preview ul,
+  .markdown-print-root .markdown-preview ol,
+  .markdown-print-root .markdown-preview table,
+  .markdown-print-root .markdown-preview pre {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .markdown-print-root .markdown-preview pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    border: 1px solid #d0d7de;
+  }
+
+  .markdown-print-root .markdown-preview code {
+    color: #000000;
+  }
+
+  .markdown-print-root .markdown-preview table {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  .markdown-print-root .markdown-preview th,
+  .markdown-print-root .markdown-preview td {
+    word-break: break-word;
+  }
+
+  .markdown-print-root .markdown-preview img,
+  .markdown-print-root .markdown-preview svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .markdown-print-root .markdown-preview a {
+    color: #000000;
+    text-decoration: underline;
+  }
+
+  .markdown-print-root .markdown-preview .mermaid-diagram,
+  .markdown-print-root .markdown-preview .drawio-diagram {
+    box-shadow: none;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

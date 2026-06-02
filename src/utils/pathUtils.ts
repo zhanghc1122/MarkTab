@@ -9,7 +9,7 @@ export function generateId(): string {
 }
 
 export function extractDirName(dirPath: string): string {
-  const normalized = dirPath.replace(/\\/g, "/").replace(/\/$/, "");
+  const normalized = dirPath.replace(/\\/g, "/").replace(/[\\/]+$/, "");
   const parts = normalized.split("/");
   return parts[parts.length - 1] || dirPath;
 }
@@ -25,4 +25,23 @@ export function extractBaseName(filePath: string): string {
   const fileName = extractFileName(filePath);
   const dotIndex = fileName.lastIndexOf(".");
   return dotIndex > 0 ? fileName.slice(0, dotIndex) : fileName;
+}
+
+export function resolvePath(path: string): string {
+  const parts = path.split(/[/\\]+/);
+  const resolved: string[] = [];
+  for (const part of parts) {
+    if (part === "..") {
+      if (resolved.length > 1) {
+        resolved.pop();
+      }
+    } else if (part !== "." && part !== "") {
+      resolved.push(part);
+    }
+  }
+  return resolved.join("\\");
+}
+
+export function normalizePathForComparison(p: string): string {
+  return p.replace(/\\/g, "/").toLowerCase();
 }

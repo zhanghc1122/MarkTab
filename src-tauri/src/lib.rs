@@ -1,8 +1,13 @@
 use tauri::{Emitter, Manager};
 
+#[tauri::command]
+fn exit_app() {
+    std::process::exit(0);
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
@@ -30,9 +35,23 @@ pub fn run() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .invoke_handler(tauri::generate_handler![exit_app])
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application");
+
+    app.run(|app_handle, event| {
+        if let tauri::RunEvent::ExitRequested { api, .. } = event {
+            if app_handle.webview_windows().is_empty() {
+                return;
+            }
+            // macOS Cmd+Q / Dock quit / `applicationShouldTerminate` reaches
+            // us here instead of as a window close. Hand the request to the
+            // frontend so it can flush auto-save and persist state, then
+            // invoke `exit_app` to actually terminate.
+            api.prevent_exit();
+            let _ = app_handle.emit("app-exit-requested", ());
+        }
+    });
 }
 
 /// Extract file path from command-line arguments.

@@ -52,6 +52,19 @@ export const useTabStore = defineStore("tab", () => {
     return closed;
   }
 
+  function requestCloseTab(id: string): boolean {
+    const tab = tabs.value.find((t) => t.id === id);
+    if (!tab) return false;
+    if (tab.isDirty) {
+      const ok = window.confirm(
+        `"${tab.fileName}" has unsaved changes. Close anyway?`
+      );
+      if (!ok) return false;
+    }
+    closeTab(id);
+    return true;
+  }
+
   function setActiveTab(id: string) {
     const tab = tabs.value.find((t) => t.id === id);
     if (tab) {
@@ -83,20 +96,19 @@ export const useTabStore = defineStore("tab", () => {
     }
   }
 
-  function closeAllTabs() {
-    tabs.value = [];
-    activeTabId.value = null;
-  }
-
-  function closeOtherTabs(id: string) {
-    tabs.value = tabs.value.filter((t) => t.id === id);
-    activeTabId.value = id;
-  }
-
   function markTabExternallyChanged(id: string) {
     const tab = tabs.value.find((t) => t.id === id);
     if (tab) {
       tab.externallyChanged = true;
+    }
+  }
+
+  function setTabExternalContent(id: string, content: string) {
+    const tab = tabs.value.find((t) => t.id === id);
+    if (tab) {
+      tab.externallyChanged = true;
+      tab.externalContent = content;
+      tab.externalModifiedAt = Date.now();
     }
   }
 
@@ -112,6 +124,8 @@ export const useTabStore = defineStore("tab", () => {
     if (tab) {
       tab.externallyChanged = false;
       tab.externallyDeleted = false;
+      tab.externalContent = undefined;
+      tab.externalModifiedAt = undefined;
     }
   }
 
@@ -123,6 +137,20 @@ export const useTabStore = defineStore("tab", () => {
       tab.isDirty = false;
       tab.externallyChanged = false;
       tab.externallyDeleted = false;
+      tab.externalContent = undefined;
+      tab.externalModifiedAt = undefined;
+    }
+  }
+
+  function applyReviewedContent(id: string, content: string) {
+    const tab = tabs.value.find((t) => t.id === id);
+    if (tab) {
+      tab.content = content;
+      tab.isDirty = content !== tab.originalContent;
+      tab.externallyChanged = false;
+      tab.externallyDeleted = false;
+      tab.externalContent = undefined;
+      tab.externalModifiedAt = undefined;
     }
   }
 
@@ -132,15 +160,16 @@ export const useTabStore = defineStore("tab", () => {
     activeTab,
     openTab,
     closeTab,
+    requestCloseTab,
     setActiveTab,
     updateTabContent,
     markTabSaved,
     saveTabScrollState,
-    closeAllTabs,
-    closeOtherTabs,
     markTabExternallyChanged,
+    setTabExternalContent,
     markTabExternallyDeleted,
     clearExternalChangeState,
     reloadTabFromDisk,
+    applyReviewedContent,
   };
 });

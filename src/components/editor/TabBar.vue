@@ -14,7 +14,7 @@ const tabStore = useTabStore();
         :tab="tab"
         :active="tab.id === tabStore.activeTabId"
         @select="tabStore.setActiveTab(tab.id)"
-        @close="tabStore.closeTab(tab.id)"
+        @close="tabStore.requestCloseTab(tab.id)"
       />
     </div>
   </div>

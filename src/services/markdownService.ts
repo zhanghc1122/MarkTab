@@ -2,6 +2,7 @@ import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { readTextFile } from "@tauri-apps/plugin-fs";
+import { resolvePath } from "../utils/pathUtils";
 
 const md = new MarkdownIt({
   html: true,
@@ -42,21 +43,6 @@ function isLocalPath(src: string): boolean {
   return true;
 }
 
-function normalizePath(path: string): string {
-  const parts = path.split(/[/\\]+/);
-  const resolved: string[] = [];
-  for (const part of parts) {
-    if (part === "..") {
-      if (resolved.length > 1) {
-        resolved.pop();
-      }
-    } else if (part !== "." && part !== "") {
-      resolved.push(part);
-    }
-  }
-  return resolved.join("\\");
-}
-
 const DRAWIO_EXTENSIONS = /\.drawio$/i;
 
 function resolveAbsolutePath(src: string, filePath: string): string | null {
@@ -79,7 +65,7 @@ function resolveAbsolutePath(src: string, filePath: string): string | null {
     absolutePath = dir + sep + decodedSrc;
   }
 
-  return normalizePath(absolutePath);
+  return resolvePath(absolutePath);
 }
 
 md.renderer.rules.image = (tokens, idx, options, env, self) => {

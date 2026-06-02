@@ -6,6 +6,7 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
+  review: [];
   reload: [];
   keepLocal: [];
   closeTab: [];
@@ -41,6 +42,9 @@ const emit = defineEmits<{
         </button>
       </template>
       <template v-else>
+        <button class="banner-btn btn-review" @click="emit('review')">
+          Review Changes
+        </button>
         <button class="banner-btn btn-reload" @click="emit('reload')">
           Reload
         </button>
@@ -106,6 +110,16 @@ const emit = defineEmits<{
 
 .banner-modified .btn-reload:hover {
   background: #d97706;
+}
+
+.banner-modified .btn-review {
+  background: #7c3aed;
+  border-color: #6d28d9;
+  color: #fff;
+}
+
+.banner-modified .btn-review:hover {
+  background: #6d28d9;
 }
 
 .banner-deleted .btn-close {

@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import type { SortOrder } from "../../types/directory";
-
-export interface SortFieldDef {
-  key: string;
-  title: string;
-  defaultOrder: SortOrder;
-}
+import type { SortOrder, SortFieldDef } from "../../types/directory";
 
 const props = withDefaults(
   defineProps<{

@@ -1,13 +1,16 @@
 import { onMounted, onBeforeUnmount } from "vue";
 import { useTabStore } from "../stores/tabStore";
 import { useEditorStore } from "../stores/editorStore";
-import { useFileStore } from "../stores/fileStore";
-import { readFileContent, openFileDialog, writeFileContent } from "../services/fileIoService";
+import { readFileContent, writeFileContent } from "../services/fileIoService";
+import { openFileFromDialog } from "./useFileDialog";
+import { useAppConfigStore } from "../stores/appConfigStore";
+import { usePrint } from "./usePrint";
 
 export function useKeyboardShortcuts() {
   const tabStore = useTabStore();
   const editorStore = useEditorStore();
-  const fileStore = useFileStore();
+  const configStore = useAppConfigStore();
+  const { printTab } = usePrint();
 
   async function handleKeyDown(e: KeyboardEvent) {
     const ctrl = e.ctrlKey || e.metaKey;
@@ -15,16 +18,7 @@ export function useKeyboardShortcuts() {
     // Ctrl+O: Open file
     if (ctrl && e.key === "o") {
       e.preventDefault();
-      const path = await openFileDialog();
-      if (!path) return;
-      try {
-        const content = await readFileContent(path);
-        const entry = fileStore.addFile(path);
-        tabStore.openTab(entry, content);
-        fileStore.persistState();
-      } catch (err) {
-        console.error("Failed to open file:", err);
-      }
+      await openFileFromDialog();
       return;
     }
 
@@ -38,6 +32,7 @@ export function useKeyboardShortcuts() {
           tabStore.markTabSaved(tab.id);
         } catch (err) {
           console.error("Failed to save file:", err);
+          window.alert(`Failed to save ${tab.fileName}:\n${err}`);
         }
       }
       return;
@@ -47,7 +42,7 @@ export function useKeyboardShortcuts() {
     if (ctrl && e.key === "w") {
       e.preventDefault();
       if (tabStore.activeTabId) {
-        tabStore.closeTab(tabStore.activeTabId);
+        tabStore.requestCloseTab(tabStore.activeTabId);
       }
       return;
     }
@@ -67,8 +62,17 @@ export function useKeyboardShortcuts() {
       return;
     }
 
-    // Ctrl+P: Toggle preview/edit mode
-    if (ctrl && e.key === "p") {
+    // Ctrl+P: Print current document
+    if (ctrl && !e.shiftKey && e.key === "p") {
+      e.preventDefault();
+      await printTab(tabStore.activeTab, {
+        fontSize: configStore.config.preferences.fontSize ?? 14,
+      });
+      return;
+    }
+
+    // Ctrl+Shift+P: Toggle preview/edit mode
+    if (ctrl && e.shiftKey && e.key === "P") {
       e.preventDefault();
       editorStore.toggleMode();
       return;

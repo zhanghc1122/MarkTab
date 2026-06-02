@@ -24,6 +24,15 @@ dist-ssr/
 src-tauri/target/
 src-tauri/gen/
 
+# Microsoft Store / MSIX — 商店发布材料，不要提交
+store/
+docs/store/submission.md
+src-tauri/icons/Square*
+src-tauri/icons/StoreLogo*
+src-tauri/icons/Wide*
+src-tauri/icons/LargeTile*
+STORE_LISTING_*.md
+
 # Claude Code files
 .claude/
 CLAUDE.md

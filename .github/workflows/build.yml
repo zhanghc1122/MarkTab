@@ -34,9 +34,20 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'MarkTab ${{ github.ref_name }}'
-          releaseBody: 'See CHANGELOG.md for details.'
-          releaseDraft: false
+          releaseBody: 'See the assets below to download.'
+          releaseDraft: true
           prerelease: false
+
+      - name: Generate MSIX tile icons
+        run: node scripts/generate-msix-icons.cjs
+
+      - name: Build MSIX package
+        run: npx @choochmeque/tauri-windows-bundle build --runner npm
+
+      - name: Upload MSIX to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: src-tauri/target/msix/*.msixbundle
 
   build-macos-intel:
     runs-on: macos-13
@@ -63,8 +74,8 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'MarkTab ${{ github.ref_name }}'
-          releaseBody: 'See CHANGELOG.md for details.'
-          releaseDraft: false
+          releaseBody: 'See the assets below to download.'
+          releaseDraft: true
           prerelease: false
           args: --target x86_64-apple-darwin
 
@@ -93,7 +104,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'MarkTab ${{ github.ref_name }}'
-          releaseBody: 'See CHANGELOG.md for details.'
-          releaseDraft: false
+          releaseBody: 'See the assets below to download.'
+          releaseDraft: true
           prerelease: false
           args: --target aarch64-apple-darwin --bundles app

@@ -50,6 +50,7 @@ export function useDirectoryTree() {
 
   async function expandDirectory(dirPath: string) {
     const dirStore = useDirectoryStore();
+    dirStore.clearNodeError(dirPath);
     const node = dirStore.getNode(dirPath);
     if (node && node.expanded) {
       dirStore.toggleNode(dirPath);
@@ -75,8 +76,18 @@ export function useDirectoryTree() {
         existing.loading = false;
       }
     } catch {
+      // Distinguish "path gone" from "exists but read failed" by stat'ing.
+      let kind: "broken" | "unreadable" = "unreadable";
+      try {
+        await stat(dirPath);
+      } catch {
+        kind = "broken";
+      }
       const existing = dirStore.getNode(dirPath);
-      if (existing) existing.loading = false;
+      if (existing) {
+        existing.loading = false;
+        existing.error = kind;
+      }
     }
   }
 
@@ -96,8 +107,9 @@ export function useDirectoryTree() {
       const fileEntry = fileStore.addFile(filePath);
       tabStore.openTab(fileEntry, content);
       dirStore.trackFileOpen(filePath);
-    } catch {
-      // File read failed silently
+    } catch (e) {
+      // Surface to devtools for now; no toast infrastructure yet (TODO).
+      console.warn("Failed to open file from sidebar:", filePath, e);
     }
   }
 

@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - 'public/**'
+      - 'public/privacy.html'
   workflow_dispatch:
 
 permissions:
@@ -25,13 +25,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Prepare Pages content
+        run: |
+          mkdir -p _pages
+          cp public/privacy.html _pages/index.html
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: public
+          path: _pages
 
       - name: Deploy to GitHub Pages
         id: deployment
