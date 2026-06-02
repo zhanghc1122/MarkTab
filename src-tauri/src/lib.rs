@@ -17,10 +17,7 @@ pub fn run() {
             if let Some(file_path) = extract_file_path(&args) {
                 let _ = app.emit("open-file", file_path);
             }
-            // Bring the existing window to front
-            if let Some(window) = app.get_webview_window("main") {
-                let _ = window.set_focus();
-            }
+            bring_main_window_to_front(app);
         }))
         .setup(|app| {
             // Check for file path in command-line arguments on first launch
@@ -52,6 +49,14 @@ pub fn run() {
             let _ = app_handle.emit("app-exit-requested", ());
         }
     });
+}
+
+fn bring_main_window_to_front(app: &tauri::AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+    }
 }
 
 /// Extract file path from command-line arguments.
